@@ -18,7 +18,7 @@
 html{scroll-padding-top:env(safe-area-inset-top,0px)}
 *,*::before,*::after{box-sizing:inherit}
 body{margin:0;background:var(--sky);color:var(--ink);font:500 18px/1.5 "Noto Sans TC","PingFang TC","Microsoft JhengHei",system-ui,sans-serif;min-height:100vh;-webkit-tap-highlight-color:transparent}
-#app{max-width:720px;margin:0 auto;padding:16px 16px 40px}
+#app{max-width:720px;margin:0 auto;padding:16px 16px 100px}
 button{font:inherit;color:inherit;cursor:pointer}
 button:focus-visible,summary:focus-visible{outline:4px solid var(--blue);outline-offset:3px}
 .en{font-family:Fredoka,"Noto Sans TC",system-ui,sans-serif}
@@ -36,6 +36,8 @@ button:focus-visible,summary:focus-visible{outline:4px solid var(--blue);outline
 .how{background:var(--card);border:3px dashed var(--line);border-radius:18px;padding:10px 16px}
 .how summary{font-weight:700;cursor:pointer;min-height:44px;display:flex;align-items:center}
 .how li{margin:6px 0}
+.dh{margin:18px 0 8px;font-size:1.05rem;color:var(--sub)}
+.spd{position:fixed;right:14px;bottom:calc(14px + env(safe-area-inset-bottom,0px));z-index:5;min-height:52px;padding:8px 18px;border:3px solid var(--line);border-radius:99px;background:var(--paper);color:var(--onpaper);font-weight:700;box-shadow:0 4px 0 var(--line)}
 .tb{height:14px;border:3px solid var(--line);border-radius:99px;background:var(--card);margin:12px auto 0;max-width:360px;overflow:hidden}.tbi{height:100%;background:#58b947}
 .ti{width:100%;min-height:56px;font:700 1.6rem Fredoka,"Noto Sans TC",sans-serif;border:3px solid var(--line);border-radius:16px;padding:8px 14px;background:var(--card);color:var(--ink);text-align:center;display:block}
 .chips{display:flex;flex-wrap:wrap;gap:10px;margin:12px 0;min-height:64px}.chips .opt{padding:8px 14px;font-size:1.2rem}
@@ -80,7 +82,8 @@ h2 em{font-style:normal;font-family:Fredoka,sans-serif;color:var(--sub);font-siz
 </style>
 </head>
 <body>
-<div id="app"></div>
+<script>window.onerror=function(m,s,l){var a=document.getElementById("app");if(a)a.innerHTML='<p style="padding:24px;font-size:20px;color:#b3261e">程式發生錯誤：'+m+'（第 '+l+' 行）。請把這段文字拍照或複製給我。</p>'};</script>
+<div id="app"><p style="padding:24px;font-size:20px">載入中…（如果一直停在這裡，請告訴我 iPad 的 iPadOS 版本）</p></div>
 <script>
 const SEC0=[
 {t:'故事時間',en:'Story Time',pg:'p.6–7',ic:'🚦',c:'#ffb347',m:['cards','listen','talk'],
@@ -136,19 +139,50 @@ const save=()=>{try{localStorage.setItem('english-park-u1',JSON.stringify(P))}ca
 const star=(s,m)=>P[s+m]||0;
 const bar=n=>'⭐'.repeat(n)+'☆'.repeat(3-n);
 const calc=(sc,n)=>sc>=n?3:Math.floor(sc/n*3);
+const SP=[{n:'很慢',r:.5},{n:'慢',r:.7},{n:'正常',r:.9},{n:'快',r:1.1}];
+let spi=1;try{const v=localStorage.getItem('english-park-spd');if(v!==null&&SP[+v])spi=+v}catch(e){}
+const spdBtn=()=>`<button class="spd" data-a="spd" aria-label="調整語速">🔊 語速：${SP[spi].n}</button>`;
 const PREF=['Samantha','Ava','Allison','Susan','Aria','Jenny','Zira','Google US English','Karen','Moira','Tessa','Serena','Google UK English Female'];
 let VP='';try{VP=localStorage.getItem('english-park-voice')||''}catch(e){}
 function voices(){try{return (window.speechSynthesis.getVoices()||[]).filter(v=>/^en[-_]/i.test(v.lang))}catch(e){return[]}}
 function pickVoice(){const vs=voices();let v=vs.find(x=>x.name===VP);if(v)return v;for(const n of PREF){v=vs.find(x=>x.name.includes(n)&&/^en[-_](US|GB|AU)/i.test(x.lang));if(v)return v}return vs.find(x=>/^en[-_]US/i.test(x.lang))||vs[0]}
-function say(t){try{const s=window.speechSynthesis;if(!s)return;s.cancel();const m=new SpeechSynthesisUtterance(t);m.lang='en-US';m.rate=.85;m.pitch=1.15;const v=pickVoice();if(v){m.voice=v;m.lang=v.lang}s.speak(m)}catch(e){}}
+function say(t){try{const s=window.speechSynthesis;if(!s)return;s.cancel();const m=new SpeechSynthesisUtterance(t);m.lang='en-US';m.rate=SP[spi].r;m.pitch=1.15;const v=pickVoice();if(v){m.voice=v;m.lang=v.lang}s.speak(m)}catch(e){}}
+const iso=d=>{d=d||new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')};
+function item(s,i){let n=0,g=0;s.m.forEach(m=>{if(SM.includes(m)){n++;g+=star(i,m)}});
+  return `<button class="btn" data-a="sec" data-i="${i}"><span class="orb sm" style="--c:${s.c}">${s.ic}</span><span><b>${s.t}</b><span class="d en">${s.en?s.en+'　':''}${s.pg?'課本 '+s.pg:(s.w?s.w.length+' 個項目':'')}</span></span><span class="st">${n?'⭐'+g+'/'+n*3:''}</span></button>`}
+function diary(){
+  const by={};SEC.forEach((s,i)=>{if(s.custom&&!s.del){const d=s.date||'0000';(by[d]||(by[d]=[])).push(i)}});
+  const ds=Object.keys(by).sort().reverse(),td=iso(),yd=iso(new Date(Date.now()-864e5));
+  const lab=d=>d==='0000'?'更早':(d===td?'今天　':d===yd?'昨天　':'')+d.slice(5).replace('-','/')+'（週'+'日一二三四五六'[new Date(d+'T00:00:00').getDay()]+'）';
+  return `${addBtn()}<h2 style="font-size:1.3rem;margin:6px 0 4px">📅 我的作業日記</h2>${ds.length?ds.map(d=>`<h3 class="dh">${lab(d)}</h3><div class="modes">${by[d].map(i=>item(SEC[i],i)).join('')}</div>`).join(''):'<p class="sub">還沒有作業。按上面的按鈕，拍下今天的作業吧！</p>'}
+  <details class="how" style="margin:20px 0 12px"><summary>📚 課本範例（Unit 1）</summary><div class="modes" style="margin-top:12px">${SEC0.map((s,i)=>item(s,i)).join('')}</div></details>`}
 function timeBar(){const m=Math.floor((T[day()]||0)/60),p=Math.min(100,Math.round(m/GOAL*100));return `<div class="tb"><div class="tbi" style="width:${p}%"></div></div><p class="sub" style="margin:6px 0 0">今天學了 ${m} / ${GOAL} 分鐘${m>=GOAL?'　🎉 達標！可以休息囉':''}</p>`}
 function addBtn(){return `<button class="go" data-a="add" style="margin:0 0 14px">📝 建立今天的作業課程</button>`}
 function parentBox(){return `<details class="how" style="margin-bottom:12px"><summary>👨‍👩‍👧 家長專區</summary><p>每日學習目標（分鐘）</p><div class="nav" style="margin:0 0 10px">${[10,15,20,30].map(g=>`<button class="go ${g===GOAL?'':'alt'}" style="margin:0" data-a="goal" data-g="${g}">${g}</button>`).join('')}</div><p>打開並使用本頁的時間，會自動計入今天的學習時間。</p>${LS.length?'<button class="go alt" data-a="clr">清除我建立的課程</button>':''}</details>`}
 function add(){return `${back('home','回到首頁')}<h2>📝 建立今天的作業課程</h2>
-<ol><li>用相機拍下課本或習作。</li><li>iPhone／iPad：在照片上長按文字，選「拷貝」。Android：用 Google 智慧鏡頭選取文字並複製。</li><li>貼到下方，<b>每行一個單字或句子</b>。想加中文可寫成：apple 蘋果</li></ol>
+<ol><li>按下方「拍照或選擇作業照片」，App 會在您的手機上辨識照片裡的英文（需要網路，第一次會比較久）。</li><li>辨識後，請檢查下方文字，有錯的直接修改。<b>每行一個單字或句子</b>；想加中文可寫成：apple 蘋果</li><li>辨識不到時，改用：在照片上長按文字 → 拷貝 → 貼到下方。</li></ol>
+<label class="go" style="cursor:pointer;margin:0 0 8px">📸 拍照或選擇作業照片<input id="ph" type="file" accept="image/*" hidden></label>
+<p id="os" class="sub" style="margin:0 0 12px">印刷的英文比較容易辨識，手寫字通常認不出來。</p>
 <input id="lt" class="ti" placeholder="課程名稱，例如：Unit 2 單字" style="text-align:left;font-size:1.1rem">
 <textarea id="lx" class="ti" rows="9" style="text-align:left;font-size:1.1rem;margin-top:10px" placeholder="a cook&#10;a baker&#10;What does he do?&#10;He's a police officer."></textarea>
 <button class="go" data-a="mk">做成課程</button><p id="ps" class="fb"></p>`}
+function setOs(c,x){const o=document.getElementById('os');if(o){o.className=c;o.textContent=x}}
+function loadT(){return new Promise((ok,no)=>{if(window.Tesseract)return ok();const s=document.createElement('script');s.src='https://cdn.jsdelivr.net/npm/tesseract.js@5.1.1/dist/tesseract.min.js';s.onload=ok;s.onerror=no;document.head.appendChild(s)})}
+async function ocr(file){
+  try{
+    setOs('sub','⏳ 正在準備辨識功能…（第一次需要下載，請保持網路連線）');
+    await loadT();
+    const img=await new Promise((ok,no)=>{const i=new Image();i.onload=()=>ok(i);i.onerror=no;i.src=URL.createObjectURL(file)});
+    const sc=Math.min(1,1800/Math.max(img.width,img.height)),c=document.createElement('canvas');
+    c.width=Math.round(img.width*sc);c.height=Math.round(img.height*sc);c.getContext('2d').drawImage(img,0,0,c.width,c.height);
+    const r=await Tesseract.recognize(c,'eng',{logger:m=>{if(m.status)setOs('sub','⏳ '+(m.status==='recognizing text'?'辨識中 '+Math.round(m.progress*100)+'%':'下載辨識資料…'))}});
+    const txt=r.data.text.split('\n').map(l=>l.trim()).filter(l=>/[A-Za-z]{2}/.test(l)).join('\n');
+    if(!txt)throw 0;
+    const lx=document.getElementById('lx');if(lx)lx.value=(lx.value?lx.value+'\n':'')+txt;
+    setOs('sub','✅ 辨識完成！請檢查下方文字，有錯的直接修改，再按「做成課程」。');
+  }catch(e){setOs('fb oops','這個環境無法自動辨識照片，或照片不夠清楚。請改用：在照片上長按文字 → 拷貝 → 貼到下方。')}
+}
+app.addEventListener('change',e=>{if(e.target.id==='ph'&&e.target.files[0])ocr(e.target.files[0])});
 function parseText(x){
   const out=[],seen=new Set();
   x.split(/\n+/).map(l=>l.trim()).filter(Boolean).forEach(l=>{
@@ -171,7 +205,7 @@ function mkLesson(){
   if(w.some(i=>i[2]==='🔤'))m.push('dict');
   if(sn.some(okS))m.push('order');m.push('parent');
   const par=["請孩子看著課本，把每個單字大聲唸一遍，你負責聽；唸不清楚時，按 🔊 示範給他聽。","玩聽寫：孩子先在紙上寫，再到「聽寫練習」核對，錯的字抄 3 遍就好，不要一次練太多。","請孩子用其中一個單字或句子，說一個跟自己有關的句子給你聽。"];
-  const s={t:ti||('我的課程 '+day()),en:'',pg:'',ic:'📝',c:COL[Math.floor(Math.random()*COL.length)],m,w,info:sn.length?{h:'句子跟讀',r:sn.map(i=>[i[0],i[1]])}:null,parent:par,custom:1};
+  const s={date:iso(),t:ti||('作業 '+iso().slice(5).replace('-','/')),en:'',pg:'',ic:'📝',c:COL[Math.floor(Math.random()*COL.length)],m,w,info:sn.length?{h:'句子跟讀',r:sn.map(i=>[i[0],i[1]])}:null,parent:par,custom:1};
   SEC.push(s);LS.push(s);saveLS();S.s=SEC.length-1;S.v='sec';render();
 }
 function parentV(){const s=SEC[S.s];return `${back('sec','回到單元')}<h2>👨‍👩‍👧 親子共學任務</h2><p>每天 5 分鐘，一起說英文。做完請點一下打勾。</p>${s.parent.map((x,i)=>`<button class="btn" data-a="ptask" data-i="${i}"><span class="ic">${P[S.s+'p'+i]?'✅':'⬜'}</span><span><b style="font-size:1.05rem">${x}</b></span></button><div class="sep"></div>`).join('')}`}
@@ -207,11 +241,11 @@ let S={v:'home',s:0,i:0,flip:false,qs:[],sc:0,pick:null,done:false,mode:'',dj:nu
 const back=(a,t)=>`<button class="back" data-a="${a}">← ${t}</button>`;
 
 function home(){
-  let tot=0,max=0;SEC.forEach((s,i)=>s.m.forEach(m=>{if(SM.includes(m)){max+=3;tot+=star(i,m)}}));
+  let tot=0,max=0;SEC.forEach((s,i)=>{if(!s.del)s.m.forEach(m=>{if(SM.includes(m)){max+=3;tot+=star(i,m)}})});
   return `<header class="top"><h1 class="tiles">${[...'英文樂園'].map((c,i)=>`<span style="--r:${[-4,3,-2,4][i]}deg">${c}</span>`).join('')}</h1>
   <p class="unit en">Unit 1　What Does He Do?</p><p class="sub">他／她做什麼工作？</p><p class="tot">⭐ ${tot} / ${max}</p>${timeBar()}</header>
-  <main class="modes" style="margin:20px 0">${SEC.map((s,i)=>`<button class="btn" data-a="sec" data-i="${i}"><span class="orb sm" style="--c:${s.c}">${s.ic}</span><span><b>${s.t}</b><span class="d en">${s.en}　課本 ${s.pg}</span></span></button>`).join('')}</main>
-  ${addBtn()}${voiceBox()}${parentBox()}
+  ${diary()}
+  ${voiceBox()}${parentBox()}
   <details class="how"><summary>📲 加入主畫面，當成 App 使用</summary><ol>
   <li>iPhone／iPad：用 Safari 開啟，點「分享」鈕，選「加入主畫面」。</li>
   <li>Android：用 Chrome 開啟，點右上角「⋮」，選「加入主畫面」或「安裝應用程式」。</li>
@@ -220,8 +254,8 @@ function home(){
 function sec(){
   const s=SEC[S.s];
   const st=m=>SM.includes(m)?bar(star(S.s,m)):(P[S.s+m]?'✅':'');
-  return `${back('home','回到課程目錄')}<h2>${s.ic} ${s.t}<em>${s.en}</em></h2><p class="sub" style="margin-top:-8px">課本 ${s.pg}</p><div class="modes">
-  ${s.m.map(m=>`<button class="btn" data-a="mode" data-m="${m}"><span class="ic">${ML[m][0]}</span><span><b>${ML[m][1]}</b><span class="d">${ML[m][2]}</span></span><span class="st">${st(m)}</span></button>`).join('')}</div>`;
+  return `${back('home','回到課程目錄')}<h2>${s.ic} ${s.t}<em>${s.en}</em></h2><p class="sub" style="margin-top:-8px">${s.custom?'作業日期 '+(s.date||''):'課本 '+s.pg}</p><div class="modes">
+  ${s.m.map(m=>`<button class="btn" data-a="mode" data-m="${m}"><span class="ic">${ML[m][0]}</span><span><b>${ML[m][1]}</b><span class="d">${ML[m][2]}</span></span><span class="st">${st(m)}</span></button>`).join('')}</div>${s.custom?'<button class="go alt" style="margin-top:22px" data-a="del">🗑️ 刪除這份作業</button>':''}`;
 }
 function cards(){
   const s=SEC[S.s],w=s.w[S.i],last=S.i===s.w.length-1;
@@ -256,7 +290,7 @@ function quiz(){
   <div class="opts ${q.big?'big':''}">${q.o.map((o,k)=>`<button class="opt ${p!==null?(o.ok?'ok':(p===k?'bad':'')):''}" data-a="pick" data-k="${k}" ${p!==null?'disabled':''}>${o.l}</button>`).join('')}</div>
   ${p!==null?`<p class="fb ${right?'good':'oops'}">${right?'🎉 答對了！':'再接再厲！正確答案：'} ${q.fb}</p><button class="go" data-a="nxt">${last?'看結果':'下一題'}</button>`:''}`;
 }
-function render(){app.innerHTML={home,sec,cards,info,dream,quiz,add,parent:parentV,dict,order}[S.v]();if(S._v!==S.v){window.scrollTo(0,0);S._v=S.v}}
+function render(){app.innerHTML={home,sec,cards,info,dream,quiz,add,parent:parentV,dict,order}[S.v]()+spdBtn();if(S._v!==S.v){window.scrollTo(0,0);S._v=S.v}}
 function startQuiz(m){
   if(m==='dict'||m==='order'){startPr(m);return}
   const s=SEC[S.s];
@@ -275,6 +309,8 @@ app.addEventListener('click',e=>{
   if(a==='vtest'){say("Hello! Nice to meet you. Let's learn English together!");return}
   else if(a==='home'){S.v='home'}
   else if(a==='add'){S.v='add'}
+  else if(a==='del'){if(confirm('確定刪除這份作業嗎？')){s.del=1;saveLS();S.v='home'}}
+  else if(a==='spd'){spi=(spi+1)%SP.length;try{localStorage.setItem('english-park-spd',spi)}catch(x){}b.textContent='🔊 語速：'+SP[spi].n;say('Listen and repeat.');return}
   else if(a==='mk'){mkLesson();return}
   else if(a==='goal'){GOAL=+b.dataset.g;try{localStorage.setItem('english-park-goal',GOAL)}catch(x){}}
   else if(a==='clr'){if(confirm('確定要清除自己建立的課程嗎？')){SEC.length=SEC0.length;LS=[];saveLS()}}
