@@ -129,14 +129,17 @@ const SM=['listen','blend','talk','dict','order'];
 ML.parent=['👨‍👩‍👧','親子共學任務','爸媽陪孩子一起做'];
 ML.dict=['✍️','聽寫練習','聽發音，拼出單字'];
 ML.order=['🧩','句子重組','把單字排成正確的句子'];
-const AIPROMPT=`你是台灣國小英語老師。附上的照片是國小英文課本或習作的頁面（可能橫放或有點歪）。請只根據照片裡真的出現的單字與句型，製作課後輔導教材，用繁體中文（台灣用語）說明。
-只回傳一個 JSON 物件，不要 markdown，格式為 {"lessons":[...]}。lessons 的每個元素代表課本的一個段落（例如 Vocabulary、Sentence Patterns、Phonics、Story），格式：
-{"t":"中文標題","en":"英文標題","pg":"頁碼或空字串","ic":"一個emoji",
-"w":[["英文單字或短句","中文","一個代表的emoji（同一段內不可重複）"]],
-"d":[["問句","問句中文","正確回答","回答中文",["明顯錯誤的選項1","明顯錯誤的選項2"]]],
-"info":{"h":"標題","r":[["英文句子","中文"]]},
-"parent":["給家長的中文任務，說明可以怎麼陪孩子練習這段內容"]}
-規則：w 最多 12 筆；d 3 到 6 筆，錯誤選項必須真的錯誤，不可也是正確答案；info 與 d 若照片沒有適合內容可省略；parent 2 到 3 筆，要具體、好執行、不需要買東西。`;
+const AIPROMPT=`你是台灣國小老師。附上的是國小課本或習作的頁面照片（可能橫放、歪斜，也可能已經有學生寫的答案或批改記號，那些不一定正確，請以題目與課文本身為準）。請先判斷科目與內容，製作課後輔導教材，用繁體中文（台灣用語）。
+只回傳一個 JSON 物件，不要 markdown，格式為 {"lessons":[...]}。每個元素代表頁面中的一個段落或主題，格式：
+{"lang":"en 或 zh","t":"中文標題","en":"英文標題或科目名","pg":"頁碼或空字串","ic":"一個emoji",
+"w":[["英文單字或短句（英文科）／重要詞語（其他科）","中文／簡短解釋","一個代表的emoji（同一段內不可重複）"]],
+"d":[["問句或題目","補充提示（可空字串）","正確答案","為什麼（一句話解釋）",["明顯錯誤的選項1","明顯錯誤的選項2"]]],
+"info":{"h":"標題","r":[["重點句子（英文科用英文；其他科用中文）","中文說明（可空字串）"]]},
+"parent":["給家長的中文任務，說明可以怎麼陪孩子練習"]}
+規則：
+- 英文科：lang 用 "en"，只用照片裡真的出現的單字與句型。
+- 其他科目（國語、數學、自然、社會等）：lang 用 "zh"；w 放重要詞語與簡短解釋；d 用課文知識出 3 到 6 題選擇題，正確答案與錯誤選項都用中文、要簡短，錯誤選項必須真的錯誤；info 放課文重點整理。
+- w 最多 12 筆；d 3 到 6 筆；info 與 d 若沒有適合內容可省略；parent 2 到 3 筆，要具體、好執行、不需要買東西。`;
 const GM=['gemini-3.6-flash','gemini-3.5-flash','gemini-3.1-flash-lite-preview','gemini-2.5-flash'];
 const AI_URL='';
 let AI={url:AI_URL,code:''};try{const v=JSON.parse(localStorage.getItem('english-park-ai')||'null');if(v){AI.url=v.url||AI_URL;AI.code=v.code||''}}catch(e){}
@@ -157,7 +160,10 @@ const PREF=['Samantha','Ava','Allison','Susan','Aria','Jenny','Zira','Google US 
 let VP='';try{VP=localStorage.getItem('english-park-voice')||''}catch(e){}
 function voices(){try{return (window.speechSynthesis.getVoices()||[]).filter(v=>/^en[-_]/i.test(v.lang))}catch(e){return[]}}
 function pickVoice(){const vs=voices();let v=vs.find(x=>x.name===VP);if(v)return v;for(const n of PREF){v=vs.find(x=>x.name.includes(n)&&/^en[-_](US|GB|AU)/i.test(x.lang));if(v)return v}return vs.find(x=>/^en[-_]US/i.test(x.lang))||vs[0]}
-function say(t){try{const s=window.speechSynthesis;if(!s)return;s.cancel();const m=new SpeechSynthesisUtterance(t);m.lang='en-US';m.rate=SP[spi].r;m.pitch=1.15;const v=pickVoice();if(v){m.voice=v;m.lang=v.lang}s.speak(m)}catch(e){}}
+function say(t){try{const s=window.speechSynthesis;if(!s)return;s.cancel();const m=new SpeechSynthesisUtterance(t);const zh=S.v!=='home'&&SEC[S.s]&&SEC[S.s].lang==='zh';m.rate=SP[spi].r;m.pitch=1.15;
+  if(zh){m.lang='zh-TW';const vs=s.getVoices(),v=vs.find(x=>/^zh[-_]TW/i.test(x.lang))||vs.find(x=>/^zh/i.test(x.lang));if(v){m.voice=v;m.lang=v.lang}}
+  else{m.lang='en-US';const v=pickVoice();if(v){m.voice=v;m.lang=v.lang}}
+  s.speak(m)}catch(e){}}
 const iso=d=>{d=d||new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')};
 function item(s,i){let n=0,g=0;s.m.forEach(m=>{if(SM.includes(m)){n++;g+=star(i,m)}});
   return `<button class="btn" data-a="sec" data-i="${i}"><span class="orb sm" style="--c:${s.c}">${s.ic}</span><span><b>${s.t}</b><span class="d en">${s.en?s.en+'　':''}${s.pg?'課本 '+s.pg:(s.w?s.w.length+' 個項目':'')}</span></span><span class="st">${n?'⭐'+g+'/'+n*3:''}</span></button>`}
@@ -187,9 +193,9 @@ function norm(s){
   const r=s.info?arr(s.info.r).filter(x=>arr(x).length>=2).map(x=>x.slice(0,2).map(String)):[];
   const info=r.length?{h:String(s.info.h||'重點整理'),r}:null;
   const par=arr(s.parent).map(String).slice(0,4);
-  const m=[];if(info)m.push('info');if(w.length)m.push('cards');if(w.length>=4)m.push('listen');if(d.length)m.push('talk');if(par.length)m.push('parent');
+  const m=[];if(info)m.push('info');if(w.length)m.push('cards');if(w.length>=4&&s.lang!=='zh')m.push('listen');if(d.length)m.push('talk');if(par.length)m.push('parent');
   if(!m.length)return null;
-  return {date:iso(),t:String(s.t),en:String(s.en||''),pg:String(s.pg||''),ic:String(s.ic||'📘'),c:COL[Math.floor(Math.random()*COL.length)],m,w,d,info,parent:par,custom:1};
+  return {date:iso(),lang:s.lang==='zh'?'zh':'en',t:String(s.t),en:String(s.en||''),pg:String(s.pg||''),ic:String(s.ic||'📘'),c:COL[Math.floor(Math.random()*COL.length)],m,w,d,info,parent:par,custom:1};
 }
 function shrink(f){return new Promise((ok,no)=>{const i=new Image(),u=URL.createObjectURL(f);i.onload=()=>{const s=Math.min(1,1600/Math.max(i.width,i.height)),c=document.createElement('canvas');c.width=Math.round(i.width*s);c.height=Math.round(i.height*s);c.getContext('2d').drawImage(i,0,0,c.width,c.height);URL.revokeObjectURL(u);ok(c.toDataURL('image/jpeg',.8))};i.onerror=no;i.src=u})}
 const aiBtn=()=>AI.url?'<button class="go" data-a="ai" style="margin:0 0 14px">✨ AI 一次辨識全部照片，直接做成課程</button>':'<p class="sub">（尚未設定 AI 辨識，請到首頁「家長專區」填寫，或用下方貼上文字）</p>';
@@ -207,7 +213,7 @@ async function aiRun(){
       for(const md of GM){
         const r=await fetch('https://generativelanguage.googleapis.com/v1beta/models/'+md+':generateContent',{method:'POST',headers:{'content-type':'application/json','x-goog-api-key':AI.url},body:JSON.stringify({contents:[{parts:[{text:AIPROMPT},...gp]}],generationConfig:{responseMimeType:'application/json',maxOutputTokens:8192,temperature:0.2}}),signal:ctl.signal});
         if(r.ok){const d=await r.json();const c=arr(d.candidates)[0];txt=arr(c&&c.content&&c.content.parts).map(q=>q.text||'').join('');if(txt)break;last='fail';continue}
-        last=r.status===429?'quota':(r.status===400||r.status===401||r.status===403)?'bad_key':'fail';
+        last=r.status===429?'quota':(r.status===400||r.status===401||r.status===403)?'bad_key':'HTTP '+r.status;
         if(r.status===429)break;
       }
       clearTimeout(tm);
@@ -236,7 +242,7 @@ async function aiRun(){
     if(ti&&list.length===1)list[0].t=ti;
     list.forEach(s=>{SEC.push(s);LS.push(s)});saveLS();
     S.s=SEC.length-list.length;S.v=list.length===1?'sec':'home';render();
-  }catch(e){setOs('fb oops',e==='quota'?'今天的免費額度用完，或按得太頻繁，請稍後再試。':e==='bad_key'?'金鑰不正確或額度不足，請到「家長專區」確認。':e==='bad_code'?'通關碼不正確，請到「家長專區」確認。':'AI 辨識沒有成功，請確認網路與照片是否清楚，或稍後再試。')}
+  }catch(e){setOs('fb oops',e==='quota'?'今天的免費額度用完，或按得太頻繁，請稍後再試。':e==='bad_key'?'金鑰不正確或額度不足，請到「家長專區」確認。':e==='bad_code'?'通關碼不正確，請到「家長專區」確認。':e==='empty'?'AI 讀了照片，但沒有整理出可用的內容。請換一頁，或拍得更清楚一點再試。':'AI 辨識沒有成功（原因：'+(e&&e.message?e.message:e)+'）。請把這行字拍給我。')}
 }
 let PF=[];
 app.addEventListener('change',e=>{
@@ -318,7 +324,7 @@ function sec(){
   const s=SEC[S.s];
   const st=m=>SM.includes(m)?bar(star(S.s,m)):(P[S.s+m]?'✅':'');
   return `${back('home','回到課程目錄')}<h2>${s.ic} ${s.t}<em>${s.en}</em></h2><p class="sub" style="margin-top:-8px">${s.custom?'作業日期 '+(s.date||''):'課本 '+s.pg}</p><div class="modes">
-  ${s.m.map(m=>`<button class="btn" data-a="mode" data-m="${m}"><span class="ic">${ML[m][0]}</span><span><b>${ML[m][1]}</b><span class="d">${ML[m][2]}</span></span><span class="st">${st(m)}</span></button>`).join('')}</div>${s.custom?'<button class="go alt" style="margin-top:22px" data-a="del">🗑️ 刪除這份作業</button>':''}`;
+  ${s.m.map(m=>`<button class="btn" data-a="mode" data-m="${m}"><span class="ic">${ML[m][0]}</span><span><b>${m==='talk'&&s.lang==='zh'?'題目練習':ML[m][1]}</b><span class="d">${m==='talk'&&s.lang==='zh'?'選出正確答案':ML[m][2]}</span></span><span class="st">${st(m)}</span></button>`).join('')}</div>${s.custom?'<button class="go alt" style="margin-top:22px" data-a="del">🗑️ 刪除這份作業</button>':''}`;
 }
 function cards(){
   const s=SEC[S.s],w=s.w[S.i],last=S.i===s.w.length-1;
