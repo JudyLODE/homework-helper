@@ -129,6 +129,16 @@ const SM=['listen','blend','talk','dict','order'];
 ML.parent=['👨‍👩‍👧','親子共學任務','爸媽陪孩子一起做'];
 ML.dict=['✍️','聽寫練習','聽發音，拼出單字'];
 ML.order=['🧩','句子重組','把單字排成正確的句子'];
+const AIPROMPT=`你是台灣國小英語老師。附上的照片是國小英文課本或習作的頁面（可能橫放或有點歪）。請只根據照片裡真的出現的單字與句型，製作課後輔導教材，用繁體中文（台灣用語）說明。
+只回傳一個 JSON 物件，不要 markdown，格式為 {"lessons":[...]}。lessons 的每個元素代表課本的一個段落（例如 Vocabulary、Sentence Patterns、Phonics、Story），格式：
+{"t":"中文標題","en":"英文標題","pg":"頁碼或空字串","ic":"一個emoji",
+"w":[["英文單字或短句","中文","一個代表的emoji（同一段內不可重複）"]],
+"d":[["問句","問句中文","正確回答","回答中文",["明顯錯誤的選項1","明顯錯誤的選項2"]]],
+"info":{"h":"標題","r":[["英文句子","中文"]]},
+"parent":["給家長的中文任務，說明可以怎麼陪孩子練習這段內容"]}
+規則：w 最多 12 筆；d 3 到 6 筆，錯誤選項必須真的錯誤，不可也是正確答案；info 與 d 若照片沒有適合內容可省略；parent 2 到 3 筆，要具體、好執行、不需要買東西。`;
+const AI_URL='';
+let AI={url:AI_URL,code:''};try{const v=JSON.parse(localStorage.getItem('english-park-ai')||'null');if(v){AI.url=v.url||AI_URL;AI.code=v.code||''}}catch(e){}
 const day=()=>{const d=new Date();return d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate()};
 let T={};try{T=JSON.parse(localStorage.getItem('english-park-time')||'{}')}catch(e){}
 let GOAL=15;try{GOAL=+(localStorage.getItem('english-park-goal')||15)}catch(e){}
@@ -158,31 +168,70 @@ function diary(){
   <details class="how" style="margin:20px 0 12px"><summary>📚 課本範例（Unit 1）</summary><div class="modes" style="margin-top:12px">${SEC0.map((s,i)=>item(s,i)).join('')}</div></details>`}
 function timeBar(){const m=Math.floor((T[day()]||0)/60),p=Math.min(100,Math.round(m/GOAL*100));return `<div class="tb"><div class="tbi" style="width:${p}%"></div></div><p class="sub" style="margin:6px 0 0">今天學了 ${m} / ${GOAL} 分鐘${m>=GOAL?'　🎉 達標！可以休息囉':''}</p>`}
 function addBtn(){return `<button class="go" data-a="add" style="margin:0 0 14px">📝 建立今天的作業課程</button>`}
-function parentBox(){return `<details class="how" style="margin-bottom:12px"><summary>👨‍👩‍👧 家長專區</summary><p>每日學習目標（分鐘）</p><div class="nav" style="margin:0 0 10px">${[10,15,20,30].map(g=>`<button class="go ${g===GOAL?'':'alt'}" style="margin:0" data-a="goal" data-g="${g}">${g}</button>`).join('')}</div><p>打開並使用本頁的時間，會自動計入今天的學習時間。</p>${LS.length?'<button class="go alt" data-a="clr">清除我建立的課程</button>':''}</details>`}
+function parentBox(){return `<details class="how" style="margin-bottom:12px"><summary>👨‍👩‍👧 家長專區</summary><p>每日學習目標（分鐘）</p><div class="nav" style="margin:0 0 10px">${[10,15,20,30].map(g=>`<button class="go ${g===GOAL?'':'alt'}" style="margin:0" data-a="goal" data-g="${g}">${g}</button>`).join('')}</div><p>打開並使用本頁的時間，會自動計入今天的學習時間。</p><p style="margin-bottom:6px"><b>AI 辨識設定</b>（照片會傳到 AI 服務處理）</p><input id="aiu" class="ti" style="font-size:1rem;text-align:left" placeholder="貼上 Claude API 金鑰（sk-ant-…）或 AI 服務網址" value="${AI.url}"><input id="aic" class="ti" style="font-size:1rem;text-align:left;margin:8px 0 10px" placeholder="通關碼（只有用服務網址時才需要）" value="${AI.code}"><button class="go alt" style="margin:0 0 12px" data-a="aisave">儲存設定</button>${LS.length?'<button class="go alt" data-a="clr">清除我建立的課程</button>':''}</details>`}
 function add(){return `${back('home','回到首頁')}<h2>📝 建立今天的作業課程</h2>
-<ol><li>按下方「拍照或選擇作業照片」，App 會在您的手機上辨識照片裡的英文（需要網路，第一次會比較久）。</li><li>辨識後，請檢查下方文字，有錯的直接修改。<b>每行一個單字或句子</b>；想加中文可寫成：apple 蘋果</li><li>辨識不到時，改用：在照片上長按文字 → 拷貝 → 貼到下方。</li></ol>
-<label class="go" style="cursor:pointer;margin:0 0 8px">📸 拍照或選擇作業照片<input id="ph" type="file" accept="image/*" hidden></label>
-<p id="os" class="sub" style="margin:0 0 12px">印刷的英文比較容易辨識，手寫字通常認不出來。</p>
+<ol><li>按「拍照或選擇作業照片」，<b>可以一次選很多張</b>。若已設定 AI，按「✨ AI 一次辨識」就會全部自動做成課程；沒有的話，用下面的方式貼上文字。</li><li><b>iPhone／iPad：長按每張照片上的英文，選「拷貝」</b>（蘋果內建文字辨識，最準確）。Android：用 Google 智慧鏡頭選取並複製。</li><li>在那張照片下面按「📋 貼上」，文字會依序加到最下方的欄位。全部貼完、檢查後，按「做成課程」。每行一個單字或句子；想加中文可寫成：apple 蘋果</li></ol>
+<label class="go" style="cursor:pointer;margin:0 0 12px">📸 拍照或選擇作業照片（可多選）<input id="ph" type="file" accept="image/*" multiple hidden></label>
+<div id="pv"></div>
+<p id="os" class="sub" style="margin:0 0 12px">提示：照片拍得越正、越清楚，結果越好。</p>
 <input id="lt" class="ti" placeholder="課程名稱，例如：Unit 2 單字" style="text-align:left;font-size:1.1rem">
 <textarea id="lx" class="ti" rows="9" style="text-align:left;font-size:1.1rem;margin-top:10px" placeholder="a cook&#10;a baker&#10;What does he do?&#10;He's a police officer."></textarea>
 <button class="go" data-a="mk">做成課程</button><p id="ps" class="fb"></p>`}
 function setOs(c,x){const o=document.getElementById('os');if(o){o.className=c;o.textContent=x}}
-function loadT(){return new Promise((ok,no)=>{if(window.Tesseract)return ok();const s=document.createElement('script');s.src='https://cdn.jsdelivr.net/npm/tesseract.js@5.1.1/dist/tesseract.min.js';s.onload=ok;s.onerror=no;document.head.appendChild(s)})}
-async function ocr(file){
-  try{
-    setOs('sub','⏳ 正在準備辨識功能…（第一次需要下載，請保持網路連線）');
-    await loadT();
-    const img=await new Promise((ok,no)=>{const i=new Image();i.onload=()=>ok(i);i.onerror=no;i.src=URL.createObjectURL(file)});
-    const sc=Math.min(1,1800/Math.max(img.width,img.height)),c=document.createElement('canvas');
-    c.width=Math.round(img.width*sc);c.height=Math.round(img.height*sc);c.getContext('2d').drawImage(img,0,0,c.width,c.height);
-    const r=await Tesseract.recognize(c,'eng',{logger:m=>{if(m.status)setOs('sub','⏳ '+(m.status==='recognizing text'?'辨識中 '+Math.round(m.progress*100)+'%':'下載辨識資料…'))}});
-    const txt=r.data.text.split('\n').map(l=>l.trim()).filter(l=>/[A-Za-z]{2}/.test(l)).join('\n');
-    if(!txt)throw 0;
-    const lx=document.getElementById('lx');if(lx)lx.value=(lx.value?lx.value+'\n':'')+txt;
-    setOs('sub','✅ 辨識完成！請檢查下方文字，有錯的直接修改，再按「做成課程」。');
-  }catch(e){setOs('fb oops','這個環境無法自動辨識照片，或照片不夠清楚。請改用：在照片上長按文字 → 拷貝 → 貼到下方。')}
+const arr=x=>Array.isArray(x)?x:[];
+function norm(s){
+  if(!s||!s.t)return null;
+  const w=arr(s.w).filter(x=>arr(x).length>=3).slice(0,16).map(x=>[String(x[0]),String(x[1]),String(x[2])]);
+  const d=arr(s.d).filter(x=>arr(x).length>=5&&arr(x[4]).length>=2).slice(0,8).map(x=>[String(x[0]),String(x[1]),String(x[2]),String(x[3]),x[4].slice(0,2).map(String)]);
+  const r=s.info?arr(s.info.r).filter(x=>arr(x).length>=2).map(x=>x.slice(0,2).map(String)):[];
+  const info=r.length?{h:String(s.info.h||'重點整理'),r}:null;
+  const par=arr(s.parent).map(String).slice(0,4);
+  const m=[];if(info)m.push('info');if(w.length)m.push('cards');if(w.length>=4)m.push('listen');if(d.length)m.push('talk');if(par.length)m.push('parent');
+  if(!m.length)return null;
+  return {date:iso(),t:String(s.t),en:String(s.en||''),pg:String(s.pg||''),ic:String(s.ic||'📘'),c:COL[Math.floor(Math.random()*COL.length)],m,w,d,info,parent:par,custom:1};
 }
-app.addEventListener('change',e=>{if(e.target.id==='ph'&&e.target.files[0])ocr(e.target.files[0])});
+function shrink(f){return new Promise((ok,no)=>{const i=new Image(),u=URL.createObjectURL(f);i.onload=()=>{const s=Math.min(1,1600/Math.max(i.width,i.height)),c=document.createElement('canvas');c.width=Math.round(i.width*s);c.height=Math.round(i.height*s);c.getContext('2d').drawImage(i,0,0,c.width,c.height);URL.revokeObjectURL(u);ok(c.toDataURL('image/jpeg',.8))};i.onerror=no;i.src=u})}
+const aiBtn=()=>AI.url?'<button class="go" data-a="ai" style="margin:0 0 14px">✨ AI 一次辨識全部照片，直接做成課程</button>':'<p class="sub">（尚未設定 AI 辨識，請到首頁「家長專區」填寫，或用下方貼上文字）</p>';
+async function aiRun(){
+  if(!AI.url){setOs('fb oops','還沒設定 AI 服務，請到首頁「家長專區」填寫。');return}
+  if(!PF.length){setOs('fb oops','請先選擇照片。');return}
+  try{
+    setOs('sub','⏳ AI 正在閱讀 '+PF.length+' 張照片，請稍等 30～90 秒…（照片會傳到 AI 服務處理）');
+    const images=await Promise.all(PF.slice(0,8).map(shrink));
+    const ctl=new AbortController(),tm=setTimeout(()=>ctl.abort(),150000);
+    let raw;
+    if(/^sk-ant-/.test(AI.url)){
+      const parts=images.map(u=>{const m=u.match(/^data:(image\/[a-z+.-]+);base64,(.+)$/i);return {type:'image',source:{type:'base64',media_type:m[1],data:m[2]}}});
+      const r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'content-type':'application/json','x-api-key':AI.url,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},body:JSON.stringify({model:'claude-sonnet-5-5',max_tokens:6000,messages:[{role:'user',content:[...parts,{type:'text',text:AIPROMPT}]}]}),signal:ctl.signal});
+      clearTimeout(tm);
+      if(r.status===401)throw 'bad_key';
+      const d=await r.json();if(!r.ok)throw 'fail';
+      const txt=arr(d.content).filter(b=>b.type==='text').map(b=>b.text).join('');
+      const m=txt.match(/\{[\s\S]*\}/);if(!m)throw 'fail';
+      raw=JSON.parse(m[0]).lessons;
+    }else{
+      const r=await fetch(AI.url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({images,code:AI.code}),signal:ctl.signal});
+      clearTimeout(tm);
+      const d=await r.json();
+      if(!r.ok)throw d.error||'fail';
+      raw=d.lessons;
+    }
+    const list=arr(raw).map(norm).filter(Boolean);
+    if(!list.length)throw 'empty';
+    const ti=(document.getElementById('lt')||{value:''}).value.trim();
+    if(ti&&list.length===1)list[0].t=ti;
+    list.forEach(s=>{SEC.push(s);LS.push(s)});saveLS();
+    S.s=SEC.length-list.length;S.v=list.length===1?'sec':'home';render();
+  }catch(e){setOs('fb oops',e==='bad_key'?'金鑰不正確或額度不足，請到「家長專區」確認。':e==='bad_code'?'通關碼不正確，請到「家長專區」確認。':'AI 辨識沒有成功，請確認網路與照片是否清楚，或稍後再試。')}
+}
+let PF=[];
+app.addEventListener('change',e=>{
+  if(e.target.id==='ph'&&e.target.files.length){
+    PF=[...e.target.files].slice(0,12);const pv=document.getElementById('pv');
+    if(pv)pv.innerHTML=aiBtn()+PF.map((f,k)=>`<div style="margin-bottom:16px"><p class="sub" style="margin:0 0 6px">第 ${k+1} 張</p><img src="${URL.createObjectURL(f)}" alt="作業照片 ${k+1}" style="width:100%;border-radius:16px;border:3px solid var(--line);margin-bottom:8px"><button class="go alt" data-a="paste" data-k="${k}" style="margin:0">📋 貼上第 ${k+1} 張的文字</button></div>`).join('');
+    setOs('sub','👆 請依序：長按照片上的文字 → 拷貝 → 按該張下方的「貼上」。');
+  }
+});
 function parseText(x){
   const out=[],seen=new Set();
   x.split(/\n+/).map(l=>l.trim()).filter(Boolean).forEach(l=>{
@@ -308,7 +357,16 @@ app.addEventListener('click',e=>{
   const a=b.dataset.a,s=SEC[S.s];
   if(a==='vtest'){say("Hello! Nice to meet you. Let's learn English together!");return}
   else if(a==='home'){S.v='home'}
-  else if(a==='add'){S.v='add'}
+  else if(a==='add'){PF=[];S.v='add'}
+  else if(a==='ai'){aiRun();return}
+  else if(a==='aisave'){AI.url=document.getElementById('aiu').value.trim();AI.code=document.getElementById('aic').value.trim();try{localStorage.setItem('english-park-ai',JSON.stringify(AI))}catch(x){}b.textContent='✅ 已儲存';return}
+  else if(a==='paste'){
+    const n=+b.dataset.k+1;
+    try{navigator.clipboard.readText().then(x=>{const lx=document.getElementById('lx');
+      if(lx&&x&&x.trim()){lx.value=(lx.value?lx.value+'\n':'')+x.trim();b.textContent='✅ 已貼上第 '+n+' 張（可再貼一次）';setOs('sub','✅ 已貼上，請檢查最下方的文字。')}
+      else setOs('fb oops','剪貼簿是空的。請先在照片上長按文字並選「拷貝」。')}).catch(()=>setOs('fb oops','無法讀取剪貼簿。請長按最下方的文字框，選「貼上」。'))}
+    catch(x){setOs('fb oops','無法讀取剪貼簿。請長按最下方的文字框，選「貼上」。')}
+    return}
   else if(a==='del'){if(confirm('確定刪除這份作業嗎？')){s.del=1;saveLS();S.v='home'}}
   else if(a==='spd'){spi=(spi+1)%SP.length;try{localStorage.setItem('english-park-spd',spi)}catch(x){}b.textContent='🔊 語速：'+SP[spi].n;say('Listen and repeat.');return}
   else if(a==='mk'){mkLesson();return}
