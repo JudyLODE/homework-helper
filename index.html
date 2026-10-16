@@ -137,6 +137,7 @@ const AIPROMPT=`你是台灣國小英語老師。附上的照片是國小英文�
 "info":{"h":"標題","r":[["英文句子","中文"]]},
 "parent":["給家長的中文任務，說明可以怎麼陪孩子練習這段內容"]}
 規則：w 最多 12 筆；d 3 到 6 筆，錯誤選項必須真的錯誤，不可也是正確答案；info 與 d 若照片沒有適合內容可省略；parent 2 到 3 筆，要具體、好執行、不需要買東西。`;
+const GM=['gemini-3.6-flash','gemini-3.5-flash','gemini-3.1-flash-lite-preview','gemini-2.5-flash'];
 const AI_URL='';
 let AI={url:AI_URL,code:''};try{const v=JSON.parse(localStorage.getItem('english-park-ai')||'null');if(v){AI.url=v.url||AI_URL;AI.code=v.code||''}}catch(e){}
 const day=()=>{const d=new Date();return d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate()};
@@ -168,7 +169,7 @@ function diary(){
   <details class="how" style="margin:20px 0 12px"><summary>📚 課本範例（Unit 1）</summary><div class="modes" style="margin-top:12px">${SEC0.map((s,i)=>item(s,i)).join('')}</div></details>`}
 function timeBar(){const m=Math.floor((T[day()]||0)/60),p=Math.min(100,Math.round(m/GOAL*100));return `<div class="tb"><div class="tbi" style="width:${p}%"></div></div><p class="sub" style="margin:6px 0 0">今天學了 ${m} / ${GOAL} 分鐘${m>=GOAL?'　🎉 達標！可以休息囉':''}</p>`}
 function addBtn(){return `<button class="go" data-a="add" style="margin:0 0 14px">📝 建立今天的作業課程</button>`}
-function parentBox(){return `<details class="how" style="margin-bottom:12px"><summary>👨‍👩‍👧 家長專區</summary><p>每日學習目標（分鐘）</p><div class="nav" style="margin:0 0 10px">${[10,15,20,30].map(g=>`<button class="go ${g===GOAL?'':'alt'}" style="margin:0" data-a="goal" data-g="${g}">${g}</button>`).join('')}</div><p>打開並使用本頁的時間，會自動計入今天的學習時間。</p><p style="margin-bottom:6px"><b>AI 辨識設定</b>（照片會傳到 AI 服務處理）</p><input id="aiu" class="ti" style="font-size:1rem;text-align:left" placeholder="貼上 Claude API 金鑰（sk-ant-…）或 AI 服務網址" value="${AI.url}"><input id="aic" class="ti" style="font-size:1rem;text-align:left;margin:8px 0 10px" placeholder="通關碼（只有用服務網址時才需要）" value="${AI.code}"><button class="go alt" style="margin:0 0 12px" data-a="aisave">儲存設定</button>${LS.length?'<button class="go alt" data-a="clr">清除我建立的課程</button>':''}</details>`}
+function parentBox(){return `<details class="how" style="margin-bottom:12px"><summary>👨‍👩‍👧 家長專區</summary><p>每日學習目標（分鐘）</p><div class="nav" style="margin:0 0 10px">${[10,15,20,30].map(g=>`<button class="go ${g===GOAL?'':'alt'}" style="margin:0" data-a="goal" data-g="${g}">${g}</button>`).join('')}</div><p>打開並使用本頁的時間，會自動計入今天的學習時間。</p><p style="margin-bottom:6px"><b>AI 辨識設定</b>（照片會傳到 AI 服務處理）</p><p class="sub" style="margin:0 0 8px">免費做法：用 Google 帳號到 aistudio.google.com，按「Get API key」建立金鑰（AIza 開頭），貼在下方第一欄，通關碼留空。免費版的內容 Google 可能用來改善產品，請留意孩子的照片。</p><input id="aiu" class="ti" style="font-size:1rem;text-align:left" placeholder="貼上 Gemini 免費金鑰（AIza…）、Claude 金鑰或服務網址" value="${AI.url}"><input id="aic" class="ti" style="font-size:1rem;text-align:left;margin:8px 0 10px" placeholder="通關碼（只有用服務網址時才需要）" value="${AI.code}"><button class="go alt" style="margin:0 0 12px" data-a="aisave">儲存設定</button>${LS.length?'<button class="go alt" data-a="clr">清除我建立的課程</button>':''}</details>`}
 function add(){return `${back('home','回到首頁')}<h2>📝 建立今天的作業課程</h2>
 <ol><li>按「拍照或選擇作業照片」，<b>可以一次選很多張</b>。若已設定 AI，按「✨ AI 一次辨識」就會全部自動做成課程；沒有的話，用下面的方式貼上文字。</li><li><b>iPhone／iPad：長按每張照片上的英文，選「拷貝」</b>（蘋果內建文字辨識，最準確）。Android：用 Google 智慧鏡頭選取並複製。</li><li>在那張照片下面按「📋 貼上」，文字會依序加到最下方的欄位。全部貼完、檢查後，按「做成課程」。每行一個單字或句子；想加中文可寫成：apple 蘋果</li></ol>
 <label class="go" style="cursor:pointer;margin:0 0 12px">📸 拍照或選擇作業照片（可多選）<input id="ph" type="file" accept="image/*" multiple hidden></label>
@@ -200,7 +201,20 @@ async function aiRun(){
     const images=await Promise.all(PF.slice(0,8).map(shrink));
     const ctl=new AbortController(),tm=setTimeout(()=>ctl.abort(),150000);
     let raw;
-    if(/^sk-ant-/.test(AI.url)){
+    if(/^AIza/.test(AI.url)){
+      const gp=images.map(u=>{const m=u.match(/^data:(image\/[a-z+.-]+);base64,(.+)$/i);return {inline_data:{mime_type:m[1],data:m[2]}}});
+      let txt='',last='fail';
+      for(const md of GM){
+        const r=await fetch('https://generativelanguage.googleapis.com/v1beta/models/'+md+':generateContent',{method:'POST',headers:{'content-type':'application/json','x-goog-api-key':AI.url},body:JSON.stringify({contents:[{parts:[{text:AIPROMPT},...gp]}],generationConfig:{responseMimeType:'application/json',maxOutputTokens:8192,temperature:0.2}}),signal:ctl.signal});
+        if(r.ok){const d=await r.json();const c=arr(d.candidates)[0];txt=arr(c&&c.content&&c.content.parts).map(q=>q.text||'').join('');if(txt)break;last='fail';continue}
+        last=r.status===429?'quota':(r.status===400||r.status===401||r.status===403)?'bad_key':'fail';
+        if(r.status===429)break;
+      }
+      clearTimeout(tm);
+      if(!txt)throw last;
+      const m=txt.match(/\{[\s\S]*\}|\[[\s\S]*\]/);if(!m)throw 'fail';
+      const j=JSON.parse(m[0]);raw=Array.isArray(j)?j:j.lessons;
+    }else if(/^sk-ant-/.test(AI.url)){
       const parts=images.map(u=>{const m=u.match(/^data:(image\/[a-z+.-]+);base64,(.+)$/i);return {type:'image',source:{type:'base64',media_type:m[1],data:m[2]}}});
       const r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'content-type':'application/json','x-api-key':AI.url,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},body:JSON.stringify({model:'claude-sonnet-5-5',max_tokens:6000,messages:[{role:'user',content:[...parts,{type:'text',text:AIPROMPT}]}]}),signal:ctl.signal});
       clearTimeout(tm);
@@ -222,7 +236,7 @@ async function aiRun(){
     if(ti&&list.length===1)list[0].t=ti;
     list.forEach(s=>{SEC.push(s);LS.push(s)});saveLS();
     S.s=SEC.length-list.length;S.v=list.length===1?'sec':'home';render();
-  }catch(e){setOs('fb oops',e==='bad_key'?'金鑰不正確或額度不足，請到「家長專區」確認。':e==='bad_code'?'通關碼不正確，請到「家長專區」確認。':'AI 辨識沒有成功，請確認網路與照片是否清楚，或稍後再試。')}
+  }catch(e){setOs('fb oops',e==='quota'?'今天的免費額度用完，或按得太頻繁，請稍後再試。':e==='bad_key'?'金鑰不正確或額度不足，請到「家長專區」確認。':e==='bad_code'?'通關碼不正確，請到「家長專區」確認。':'AI 辨識沒有成功，請確認網路與照片是否清楚，或稍後再試。')}
 }
 let PF=[];
 app.addEventListener('change',e=>{
