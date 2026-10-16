@@ -216,7 +216,7 @@ async function aiRun(){
           const ld=await lr.json();
           const sc=n=>{const v=n.match(/(\d+(?:\.\d+)?)/);return (v?parseFloat(v[1]):0)*10-(/lite/i.test(n)?3:0)-(/preview|exp/i.test(n)?1:0)};
           const names=arr(ld.models).filter(x=>arr(x.supportedGenerationMethods).includes('generateContent')&&/flash/i.test(x.name)&&!/image|tts|live|audio|embed|robotics|computer|native|thinking-exp/i.test(x.name)).map(x=>x.name.replace(/^models\//,'')).sort((a,b)=>sc(b)-sc(a));
-          if(names.length)models=names.slice(0,4);
+          if(names.length)models=names.slice(0,10);
         }else if(lr.status===400||lr.status===401||lr.status===403){
           let mm='';try{const j=await lr.json();mm=(j.error&&j.error.message)||''}catch(x){}
           if(/API key/i.test(mm))throw 'bad_key';
@@ -226,7 +226,7 @@ async function aiRun(){
         const r=await fetch('https://generativelanguage.googleapis.com/v1beta/models/'+md+':generateContent',{method:'POST',headers:{'content-type':'application/json','x-goog-api-key':AI.url},body:JSON.stringify({contents:[{parts:[{text:AIPROMPT},...gp]}],generationConfig:{responseMimeType:'application/json',maxOutputTokens:8192,temperature:0.2}}),signal:ctl.signal});
         if(r.ok){const d=await r.json();const c=arr(d.candidates)[0];txt=arr(c&&c.content&&c.content.parts).map(q=>q.text||'').join('');if(txt)break;last='AI 沒有回傳內容（'+md+'）';continue}
         let msg='';try{const j=await r.json();msg=(j.error&&j.error.message)||''}catch(x){}
-        const cand=r.status===429?'quota':(/API key/i.test(msg)?'bad_key':'HTTP '+r.status+' '+md+' '+msg.slice(0,90));
+        const cand=r.status===402?'nocredit':r.status===429?'quota':(/API key/i.test(msg)?'bad_key':'HTTP '+r.status+' '+md+' '+msg.slice(0,90));
         if(r.status!==404||last==='fail')last=cand;
       }
       clearTimeout(tm);
@@ -255,7 +255,7 @@ async function aiRun(){
     if(ti&&list.length===1)list[0].t=ti;
     list.forEach(s=>{SEC.push(s);LS.push(s)});saveLS();
     S.s=SEC.length-list.length;S.v=list.length===1?'sec':'home';render();
-  }catch(e){setOs('fb oops',e==='quota'?'今天的免費額度用完，或按得太頻繁，請稍後再試。':e==='bad_key'?'金鑰不正確或額度不足，請到「家長專區」確認。':e==='bad_code'?'通關碼不正確，請到「家長專區」確認。':e==='empty'?'AI 讀了照片，但沒有整理出可用的內容。請換一頁，或拍得更清楚一點再試。':'AI 辨識沒有成功（原因：'+(e&&e.message?e.message:e)+'）。請把這行字拍給我。')}
+  }catch(e){setOs('fb oops',e==='nocredit'?'這把金鑰所在的 Google 專案是「付費模式」而且沒有餘額（Google 回報 402）。請到 aistudio.google.com 建立一個「沒有設定付費」的新專案，再建立新金鑰，貼到家長專區。':e==='quota'?'今天的免費額度用完，或按得太頻繁，請稍後再試。':e==='bad_key'?'金鑰不正確或額度不足，請到「家長專區」確認。':e==='bad_code'?'通關碼不正確，請到「家長專區」確認。':e==='empty'?'AI 讀了照片，但沒有整理出可用的內容。請換一頁，或拍得更清楚一點再試。':'AI 辨識沒有成功（原因：'+(e&&e.message?e.message:e)+'）。請把這行字拍給我。')}
 }
 let PF=[];
 app.addEventListener('change',e=>{
@@ -327,7 +327,7 @@ function home(){
   return `<header class="top"><h1 class="tiles">${[...'英文樂園'].map((c,i)=>`<span style="--r:${[-4,3,-2,4][i]}deg">${c}</span>`).join('')}</h1>
   <p class="unit en">Unit 1　What Does He Do?</p><p class="sub">他／她做什麼工作？</p><p class="tot">⭐ ${tot} / ${max}</p>${timeBar()}</header>
   ${diary()}
-  ${voiceBox()}${parentBox()}<p class="sub" style="text-align:center;margin-top:18px">版本 v3（10/16）</p>
+  ${voiceBox()}${parentBox()}<p class="sub" style="text-align:center;margin-top:18px">版本 v4（10/16）</p>
   <details class="how"><summary>📲 加入主畫面，當成 App 使用</summary><ol>
   <li>iPhone／iPad：用 Safari 開啟，點「分享」鈕，選「加入主畫面」。</li>
   <li>Android：用 Chrome 開啟，點右上角「⋮」，選「加入主畫面」或「安裝應用程式」。</li>
