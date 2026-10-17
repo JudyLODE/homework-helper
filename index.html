@@ -84,6 +84,14 @@ h2 em{font-style:normal;font-family:Fredoka,sans-serif;color:var(--sub);font-siz
 .opts.g3{grid-template-columns:repeat(3,1fr)}
 .g3 .opt{font-size:2.2rem;display:flex;flex-direction:column;align-items:center;min-height:96px;padding:8px 4px}
 .g3 .opt small{font-size:.85rem;font-weight:700;font-family:"Noto Sans TC",sans-serif}
+.dg{margin:14px 0}.dg svg{border-radius:16px}.fc .dg{margin:0;width:100%}
+.vf{display:grid;justify-content:center;font:700 2rem/1.25 Fredoka,monospace;margin:14px 0;background:var(--card);border:3px solid var(--line);border-radius:16px;padding:10px 14px;width:fit-content;margin-left:auto;margin-right:auto}
+.vc{text-align:right;padding:0 4px;min-height:1.25em;border-radius:6px}.vc.cr{color:#e53935;font-size:1rem;text-align:center}.vc.hl{background:var(--paper);color:var(--onpaper)}.vc.rs{color:var(--blue)}
+.vl{border-top:4px solid var(--line);margin:2px 0}
+.bigeq{font:700 1.9rem/1.5 Fredoka,"Noto Sans TC",sans-serif;text-align:center;background:var(--card);border:3px solid var(--line);border-radius:16px;padding:12px;margin:14px 0}
+.ti,.go{box-sizing:border-box;max-width:100%}
+.tags{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 8px}.tag{font-size:.85rem;font-weight:700;padding:2px 10px;border:2px solid var(--line);border-radius:99px;background:var(--card)}.tag.o{background:var(--ok)}.tag.v{background:var(--paper);color:var(--onpaper)}
+.set{background:var(--card);border:3px solid var(--line);border-radius:18px;padding:10px 14px;margin:0 0 14px}.set p{margin:6px 0 4px;font-weight:700;font-size:.95rem}.set .chips2{margin:0 0 4px}
 </style>
 </head>
 <body>
@@ -127,6 +135,208 @@ const PAR0=[["請孩子用動作演出「Do not run in the street.」，再說�
 SEC0.forEach((s,i)=>{s.parent=PAR0[i];s.m=s.m.concat('parent');s.sub='en'});
 const SUB={en:{n:'英文',ic:'🔤',c:'#6ec6ff'},cn:{n:'國語',ic:'📖',c:'#f59bbd'},math:{n:'數學',ic:'➗',c:'#ffb347'},sci:{n:'自然',ic:'🌱',c:'#7bd36f'},soc:{n:'社會',ic:'🗺️',c:'#b794f6'}};
 const sk=s=>(s.sub&&SUB[s.sub])?s.sub:(s.lang==='zh'?'cn':'en');
+/* 自然科示意圖庫：每個鍵對應一個與文字說明相符的 SVG */
+const DIA=(()=>{
+const F='font-family="Noto Sans TC,PingFang TC,Microsoft JhengHei,sans-serif"';
+const INK='#1b2a5c',G1='#4caf50',G2='#2e7d32',ST='#7cb342',BR='#8d6e63';
+const wrap=(w,h,body,cap)=>`<svg viewBox="0 0 ${w} ${h}" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="${cap||''}" style="width:100%;height:auto;display:block"><rect x="1.5" y="1.5" width="${w-3}" height="${h-3}" rx="16" fill="#f6fbf1" stroke="#9ccc65" stroke-width="3"/>${body}</svg>`;
+const tx=(x,y,t,o={})=>`<text x="${x}" y="${y}" ${F} font-size="${o.s||15}" font-weight="${o.w||700}" fill="${o.c||INK}" text-anchor="${o.a||'start'}">${t}</text>`;
+const ln=(x1,y1,x2,y2,c)=>`<path d="M${x1} ${y1}L${x2} ${y2}" stroke="${c||INK}" stroke-width="1.6" fill="none"/><circle cx="${x2}" cy="${y2}" r="3.2" fill="${c||INK}"/>`;
+const leaf=(x,y,a,l,col,w)=>{w=w||l*.26;return `<g transform="translate(${x} ${y}) rotate(${a})"><path d="M0 0Q${l*.45} ${-w*1.5} ${l} 0Q${l*.45} ${w*1.5} 0 0Z" fill="${col||G1}" stroke="${G2}" stroke-width="1.6"/><path d="M2 0L${l*.9} 0" stroke="${G2}" stroke-width="1.3"/></g>`};
+const stem=(x,y1,y2,w)=>`<path d="M${x} ${y1}L${x} ${y2}" stroke="${ST}" stroke-width="${w||9}" stroke-linecap="round"/>`;
+const node=(x,y)=>`<ellipse cx="${x}" cy="${y}" rx="9" ry="5" fill="#558b2f" stroke="#33691e" stroke-width="1.4"/>`;
+const ring=(x,y,r)=>`<circle cx="${x}" cy="${y}" r="${r||22}" fill="none" stroke="#e53935" stroke-width="3" stroke-dasharray="6 4"/>`;
+const ground=(y,w)=>`<path d="M10 ${y}H${w-10}" stroke="${BR}" stroke-width="4" stroke-linecap="round"/><rect x="10" y="${y+2}" width="${w-20}" height="${220-y-8}" fill="#e6d3b3" opacity=".6"/>`;
+
+/* 單一葉序的畫法，座標：莖在 x=100，高度 220 */
+const dAlt=()=>stem(100,205,12)+[[165,1],[110,-1],[55,1]].map(([y,d])=>node(100,y)+leaf(100,y,d>0?-35:-145,62)).join('');
+const dOpp=()=>stem(100,205,12)+[[150],[80]].map(([y])=>node(100,y)+leaf(100,y,-30,62)+leaf(100,y,-150,62)).join('');
+const dWho=()=>stem(100,205,12)+node(100,110)+[-165,-130,-50,-15].map(a=>leaf(100,110,a,60)).join('');
+const stemUp=()=>stem(100,205,12);
+
+const D={};
+D.node=()=>wrap(320,220,
+ stem(130,205,12)+node(130,170)+node(130,110)+node(130,50)+leaf(130,170,-35,62)+leaf(130,110,-145,62)+leaf(130,50,-35,62)+
+ ln(190,110,139,110)+tx(196,106,'節')+tx(196,125,'長出葉子的位置',{s:13,w:500})+
+ `<path d="M104 167V113" stroke="#e53935" stroke-width="2.4"/><path d="M99 167h10M99 113h10" stroke="#e53935" stroke-width="2.4"/>`+tx(100,145,'節間',{a:'end',c:'#e53935',s:14}),'莖上的節');
+
+D.alt=()=>wrap(320,220,
+ `<g transform="translate(30 0)">${dAlt()}</g>`+ring(130,165,20)+
+ tx(190,60,'互生',{s:22})+tx(190,90,'1 個節',{s:15,w:500})+tx(190,112,'只長 1 片葉子',{s:15,w:500})+tx(190,140,'左右交互排列',{s:15,w:500}),'互生');
+D.opp=()=>wrap(320,220,
+ `<g transform="translate(30 0)">${dOpp()}</g>`+ring(130,150,24)+
+ tx(190,60,'對生',{s:22})+tx(190,90,'1 個節',{s:15,w:500})+tx(190,112,'長 2 片葉子',{s:15,w:500})+tx(190,140,'面對面',{s:15,w:500}),'對生');
+D.who=()=>wrap(320,220,
+ `<g transform="translate(20 0)">${dWho()}</g>`+ring(120,110,24)+
+ tx(185,50,'輪生',{s:22})+tx(185,78,'1 個節',{s:15,w:500})+tx(185,98,'長 3 片或以上',{s:15,w:500})+
+ `<g transform="translate(250 160)"><circle r="2.5" fill="${INK}"/>${[-90,30,150].map(a=>leaf(0,0,a,30,G1,7)).join('')}</g>`+tx(250,206,'從上面看',{a:'middle',s:12,w:500}),'輪生');
+D.leafOrder=()=>wrap(320,230,
+ [['互生',dAlt()],['對生',dOpp()],['輪生',dWho()]].map(([n,b],i)=>`<g transform="translate(${i*104+4} 8) scale(.5)">${b}</g>`+tx(i*104+54,148,n,{a:'middle',s:20})).join('')+
+ [['1 個節','長 1 片'],['1 個節','長 2 片'],['1 個節','長 3 片以上']].map(([a,b],i)=>tx(i*104+54,174,a,{a:'middle',s:13,w:500})+tx(i*104+54,194,b,{a:'middle',s:13,w:500})).join('')+
+ `<path d="M106 20V210M210 20V210" stroke="#c5e1a5" stroke-width="2"/>`,'葉序：互生、對生、輪生');
+
+D.stems=()=>{
+ const herb=stem(55,190,60,6)+leaf(55,140,-40,30)+leaf(55,105,-140,30)+leaf(55,75,-40,26)+`<ellipse cx="55" cy="55" rx="9" ry="9" fill="#f48fb1"/>`;
+ const tree=`<path d="M160 195L162 120Q158 100 154 80M162 125Q176 105 190 92M160 140Q146 118 132 108" stroke="${BR}" stroke-width="11" fill="none" stroke-linecap="round"/><path d="M158 195H168" stroke="${BR}" stroke-width="13"/>`+[[120,80,26],[160,62,30],[196,86,26],[140,104,22],[180,110,22]].map(([x,y,r])=>`<circle cx="${x}" cy="${y}" r="${r}" fill="${G1}" stroke="${G2}" stroke-width="2"/>`).join('');
+ const vine=`<path d="M265 195V35" stroke="#9e9e9e" stroke-width="7" stroke-linecap="round"/><path d="M262 190C300 178 232 164 268 152C302 142 232 128 268 116C302 106 232 92 268 80C298 70 236 58 262 46" stroke="${G2}" stroke-width="5" fill="none" stroke-linecap="round"/>`+leaf(285,150,-20,24)+leaf(246,112,-160,24)+leaf(284,78,-20,22);
+ return wrap(320,250,ground(195,320)+herb+tree+vine+tx(55,225,'草本莖',{a:'middle',s:16})+tx(160,225,'木本莖',{a:'middle',s:16})+tx(265,225,'藤本莖',{a:'middle',s:16})+
+  tx(55,242,'柔軟、直立',{a:'middle',s:11,w:500})+tx(160,242,'堅硬、粗壯',{a:'middle',s:11,w:500})+tx(265,242,'攀爬、纏繞',{a:'middle',s:11,w:500}),'三種莖');};
+D.herb=()=>wrap(320,230,ground(190,320)+`<g transform="translate(70 0)">`+stem(60,190,50,8)+leaf(60,150,-40,48)+leaf(60,115,-140,48)+leaf(60,80,-40,44)+`<circle cx="60" cy="44" r="12" fill="#f48fb1" stroke="#c2185b" stroke-width="2"/></g>`+tx(190,70,'草本莖',{s:22})+tx(190,100,'莖比較柔軟',{s:15,w:500})+tx(190,122,'大多直立生長',{s:15,w:500})+tx(190,144,'例：莧菜、向日葵',{s:13,w:500}),'草本莖');
+D.vine=()=>wrap(320,230,ground(190,320)+`<path d="M90 190V28" stroke="#9e9e9e" stroke-width="8" stroke-linecap="round"/><path d="M86 186C130 172 50 156 94 142C138 130 50 114 94 100C138 88 50 72 94 60C130 50 66 40 88 30" stroke="${G2}" stroke-width="5.5" fill="none" stroke-linecap="round"/>`+leaf(116,138,-20,28)+leaf(66,98,-160,28)+leaf(118,64,-25,26)+tx(165,70,'藤本莖',{s:22})+tx(165,100,'會攀爬或纏繞',{s:15,w:500})+tx(165,122,'在其他物體上',{s:15,w:500})+tx(165,144,'例：牽牛花',{s:13,w:500}),'藤本莖');
+D.tree=()=>wrap(320,230,ground(190,320)+`<path d="M95 190L98 110Q94 92 88 70M98 120Q114 98 130 84M96 135Q80 112 62 100" stroke="${BR}" stroke-width="14" fill="none" stroke-linecap="round"/>`+[[60,70,28],[100,48,32],[140,72,28],[80,92,24],[120,98,24]].map(([x,y,r])=>`<circle cx="${x}" cy="${y}" r="${r}" fill="${G1}" stroke="${G2}" stroke-width="2"/>`).join('')+tx(180,70,'木本莖',{s:22})+tx(180,100,'莖堅硬、粗壯',{s:15,w:500})+tx(180,122,'可以長成大樹',{s:15,w:500}),'木本莖');
+
+D.taproot=()=>wrap(320,240,
+ ground(70,320).replace(/fill="#e6d3b3"/,'fill="#e6d3b3"')+
+ `<path d="M160 70V50" stroke="${ST}" stroke-width="10"/>`+leaf(160,56,-70,50)+leaf(160,56,-110,50)+leaf(160,60,-30,44)+leaf(160,60,-150,44)+
+ `<path d="M150 70Q158 150 160 212Q162 150 170 70Z" fill="#d7a86e" stroke="#8d6e63" stroke-width="2"/>`+
+ `<path d="M155 100Q125 108 108 124M155 130Q132 140 118 158M164 112Q192 118 210 134M164 146Q188 154 200 172M158 168Q142 178 134 192M162 180Q178 190 184 204" stroke="#a1887f" stroke-width="3.5" fill="none" stroke-linecap="round"/>`+
+ ln(104,170,157,188)+tx(100,168,'主根',{a:'end'})+tx(100,186,'又粗又長',{a:'end',s:12,w:500})+
+ ln(222,118,196,126,'#e53935')+tx(226,124,'側根',{c:'#e53935'})+tx(226,142,'較細小',{s:12,w:500,c:'#e53935'})+
+ tx(20,30,'軸根',{s:22})+tx(20,52,'有一條粗大的主根',{s:13,w:500}),'軸根');
+D.fibrous=()=>wrap(320,240,
+ ground(70,320)+`<g transform="translate(58 0)">`+
+ [-52,-30,-10,10,30,52].map((a,i)=>leaf(160,66,-90+a*1.3,[56,60,64,64,60,56][i],'#66bb6a',7)).join('')+
+ `<path d="M160 72V58" stroke="${ST}" stroke-width="9"/>`+
+ [[-70,128,90],[-52,160,150],[-30,185,205],[-10,198,230],[10,198,230],[30,185,205],[52,160,150],[70,128,90]].map(([a,x,y])=>`<path d="M160 74Q${160+a*.7} ${y*.45} ${160+a*1.25} ${y}" stroke="#a1887f" stroke-width="3" fill="none" stroke-linecap="round"/>`).join('')+
+ `</g>`+
+ ln(112,170,168,176)+tx(106,174,'鬚根',{a:'end',s:17})+tx(106,194,'很多細小的根',{a:'end',s:12,w:500})+
+ tx(18,32,'鬚根',{s:22})+tx(18,54,'由許多細小的根組成',{s:13,w:500}),'鬚根');
+D.flower=()=>wrap(320,250,
+ `<path d="M154 232V176" stroke="${ST}" stroke-width="10"/>`+
+ /* 花瓣 */
+ `<path d="M150 158Q86 150 84 80Q122 96 152 150Z" fill="#f8a1c4" stroke="#c2185b" stroke-width="2"/><path d="M158 158Q222 150 224 80Q186 96 156 150Z" fill="#f8a1c4" stroke="#c2185b" stroke-width="2"/>`+
+ `<path d="M148 156Q112 120 118 66Q146 100 154 150Z" fill="#fbb8d3" stroke="#c2185b" stroke-width="2"/><path d="M160 156Q196 120 190 66Q162 100 154 150Z" fill="#fbb8d3" stroke="#c2185b" stroke-width="2"/>`+
+ /* 雄蕊 */
+ [[132,150,118,96],[142,152,134,88],[170,152,176,88],[178,150,192,96]].map(([x1,y1,x2,y2])=>`<path d="M${x1} ${y1}L${x2} ${y2}" stroke="#8a6d00" stroke-width="2.4"/><ellipse cx="${x2}" cy="${y2-3}" rx="6" ry="4.5" fill="#ffd54f" stroke="#8a6d00" stroke-width="1.6"/>`).join('')+
+ /* 雌蕊 */
+ `<path d="M154 160V86" stroke="#7cb342" stroke-width="7" stroke-linecap="round"/><ellipse cx="154" cy="82" rx="8" ry="6" fill="#aed581" stroke="#33691e" stroke-width="2"/><ellipse cx="154" cy="162" rx="12" ry="11" fill="#9ccc65" stroke="#33691e" stroke-width="2"/>`+
+ /* 花萼 */
+ `<path d="M122 158Q154 190 186 158Q176 182 154 186Q132 182 122 158Z" fill="${G1}" stroke="${G2}" stroke-width="2"/><path d="M128 164L110 180Q130 182 142 178Z M180 164L198 180Q178 182 166 178Z" fill="${G1}" stroke="${G2}" stroke-width="2"/>`+
+ ln(60,60,100,100)+tx(58,56,'花瓣',{a:'end'})+
+ ln(250,50,194,92)+tx(254,52,'雄蕊')+tx(254,70,'產生花粉',{s:11,w:500})+
+ ln(248,126,160,120)+tx(252,128,'雌蕊')+tx(252,146,'發育成果實',{s:11,w:500})+
+ ln(60,200,126,170)+tx(58,206,'花萼',{a:'end'})+tx(58,224,'保護花瓣',{a:'end',s:11,w:500}),'花的構造');
+
+D.watermelon=()=>wrap(320,230,
+ `<path d="M30 70H290A130 130 0 0 1 30 70Z" fill="#2e7d32" stroke="#1b5e20" stroke-width="3"/><path d="M42 72H278A118 118 0 0 1 42 72Z" fill="#e8f5e9"/><path d="M52 74H268A108 108 0 0 1 52 74Z" fill="#ef5350"/>`+
+ [[110,102],[150,112],[190,102],[130,138],[170,138],[210,128],[92,126],[150,160]].map(([x,y])=>`<ellipse cx="${x}" cy="${y}" rx="5" ry="8" fill="#212121" transform="rotate(${(x*7)%40-20} ${x} ${y})"/>`).join('')+
+ ln(262,180,222,130)+tx(266,184,'種子',{a:'start'})+tx(266,202,'有很多顆',{s:12,w:500})+
+ ln(40,30,70,88)+tx(36,26,'果實（整個西瓜）',{s:15,a:'start'})+tx(36,48,'裡面有種子',{s:12,w:500}),'西瓜：果實裡有種子');
+D.pod=()=>wrap(320,200,
+ `<path d="M20 100Q80 40 160 52Q250 66 300 110Q240 150 150 150Q70 150 20 100Z" fill="#7cb342" stroke="#33691e" stroke-width="3"/>`+
+ `<path d="M34 104Q90 60 160 68Q235 78 276 108Q225 138 150 136Q80 134 34 104Z" fill="#c5e1a5" stroke="#33691e" stroke-width="2"/>`+
+ [70,105,140,175,210,245].map((x,i)=>`<circle cx="${x}" cy="${[100,96,98,100,102,106][i]}" r="13" fill="#558b2f" stroke="#33691e" stroke-width="2"/><circle cx="${x-4}" cy="${[100,96,98,100,102,106][i]-4}" r="3.5" fill="#aed581"/>`).join('')+
+ tx(160,30,'綠豆莢＝果實',{a:'middle',s:18,c:'#33691e'})+ln(100,36,100,64,'#33691e')+
+ tx(160,184,'綠豆＝種子',{a:'middle',s:18,c:'#33691e'})+ln(160,164,140,112,'#33691e'),'豆莢是果實，綠豆是種子');
+D.seedGrow=()=>wrap(320,220,
+ ground(150,320)+
+ `<ellipse cx="55" cy="170" rx="14" ry="9" fill="#a1887f" stroke="#5d4037" stroke-width="2"/>`+
+ `<path d="M150 150V122" stroke="${ST}" stroke-width="5"/>`+leaf(150,124,-60,22)+leaf(150,124,-120,22)+`<ellipse cx="150" cy="162" rx="12" ry="8" fill="#a1887f" stroke="#5d4037" stroke-width="2"/>`+
+ `<path d="M255 150V70" stroke="${ST}" stroke-width="7"/>`+leaf(255,120,-40,36)+leaf(255,100,-140,36)+leaf(255,78,-50,32)+leaf(255,78,-130,32)+
+ `<path d="M255 150Q240 170 232 186M255 150Q262 172 268 190M255 150Q250 176 252 192" stroke="#a1887f" stroke-width="2.6" fill="none"/>`+
+ `<path d="M82 100H112M178 100H228" stroke="${INK}" stroke-width="2.4"/><path d="M112 100l-8-6v12zM228 100l-8-6v12z" fill="${INK}"/>`+
+ tx(55,30,'種子',{a:'middle',s:18})+tx(150,30,'發芽',{a:'middle',s:18})+tx(255,30,'長成新植物',{a:'middle',s:18})+tx(55,206,'①',{a:'middle'})+tx(150,206,'②',{a:'middle'})+tx(255,206,'③',{a:'middle'}),'種子長成新植物');
+D.leafEdge=()=>{
+ const sm=`<path d="M20 90Q80 10 150 90Q80 170 20 90Z" fill="${G1}" stroke="${G2}" stroke-width="3"/><path d="M20 90H150" stroke="${G2}" stroke-width="2"/>`;
+ const up=[],lo=[],n=9;
+ for(let i=0;i<=n;i++){const t=i/n,w=Math.sin(Math.PI*t)*62,x=175+t*130;up.push([x,90-w]);lo.push([x,90+w]);
+  if(i<n){const t2=(i+.5)/n,w2=Math.sin(Math.PI*t2)*62+9,x2=175+t2*130;up.push([x2,90-w2]);lo.push([x2,90+w2])}}
+ const P=up.map((p,i)=>(i?'L':'M')+p[0].toFixed(1)+' '+p[1].toFixed(1)).join('')+lo.reverse().map(p=>'L'+p[0].toFixed(1)+' '+p[1].toFixed(1)).join('')+'Z';
+ return wrap(320,210,sm+`<path d="${P}" fill="${G1}" stroke="${G2}" stroke-width="2.4" stroke-linejoin="round"/><path d="M175 90H305" stroke="${G2}" stroke-width="2"/>`+
+  tx(85,176,'葉緣平滑',{a:'middle',s:19})+tx(85,196,'邊緣沒有缺刻（例：福木）',{a:'middle',s:11,w:500})+
+  tx(240,176,'葉緣鋸齒',{a:'middle',s:19})+tx(240,196,'邊緣像小鋸子',{a:'middle',s:11,w:500}),'葉緣平滑與鋸齒');};
+return D;})();
+
+
+/* 數學「教我怎麼算」：位值籌碼 + 直式進位 + 線段圖，全部由題目的數字自動算出 */
+const TCH=(()=>{
+const F='font-family="Noto Sans TC,PingFang TC,Microsoft JhengHei,sans-serif"';
+const INK='#1b2a5c',COL=['#ffd54f','#81d4fa','#a5d6a7','#e1bee7','#ffab91'],NM=['一','十','百','千','萬'],PN=['個位','十位','百位','千位','萬位'],VAL=[1,10,100,1000,10000];
+const tx=(x,y,t,o={})=>`<text x="${x}" y="${y}" ${F} font-size="${o.s||14}" font-weight="${o.w||700}" fill="${o.c||INK}" text-anchor="${o.a||'start'}">${t}</text>`;
+const tok=(x,y,p,o={})=>{const l=String(VAL[p]);return `<rect x="${x}" y="${y}" width="${o.w||24}" height="${o.h||16}" rx="5" fill="${COL[p]}" stroke="${o.ring?'#e53935':'#546e7a'}" stroke-width="${o.ring?2.2:1.2}" ${o.ring?'stroke-dasharray="4 2"':''}/>`+tx(x+(o.w||24)/2,y+(o.h||16)/2+(l.length>3?3:4),l,{a:'middle',s:l.length>4?7:l.length>3?8:10,c:'#263238'})};
+const svg=(h,b,cap)=>`<svg viewBox="0 0 360 ${h}" role="img" aria-label="${cap}" style="width:100%;height:auto;display:block;background:#fff;border:3px solid #1b2a5c;border-radius:16px">${b}</svg>`;
+
+function parse(q){
+  const src=[q[0],q[2],...(q[3]||[])].map(String);let m=null;
+  for(const t of src){m=t.match(/(\d+)\s*[×xX＊*]\s*(\d+)/);if(m)break}
+  if(!m)return null;let a=+m[1],b=+m[2];
+  if(b>9&&a<=9){[a,b]=[b,a]}
+  const ans=+String(q[1]).replace(/[^\d]/g,'');
+  if(!(a>=10&&a<=9999&&b>=2&&b<=9)||a*b!==ans)return null;
+  return {a,b,ans,word:!/^[\d\s×xX＝=？?]+$/.test(String(q[0]))};
+}
+function bar(a,b){
+  const n=b,gap=4,W=330,bw=Math.min(70,(W-gap*(n-1))/n),tot=n*bw+gap*(n-1),x0=(360-tot)/2;
+  let s='';for(let i=0;i<n;i++)s+=`<rect x="${x0+i*(bw+gap)}" y="64" width="${bw}" height="46" rx="6" fill="#ffe082" stroke="#8d6e00" stroke-width="2"/>`+tx(x0+i*(bw+gap)+bw/2,93,a,{a:'middle',s:bw<40?13:18});
+  s+=`<path d="M${x0} 54Q${x0} 44 ${x0+10} 44H${x0+tot/2-10}Q${x0+tot/2} 44 ${x0+tot/2} 34Q${x0+tot/2} 44 ${x0+tot/2+10} 44H${x0+tot-10}Q${x0+tot} 44 ${x0+tot} 54" fill="none" stroke="#e53935" stroke-width="2.6"/>`+tx(x0+tot/2,26,'一共 ＝ ？',{a:'middle',s:17,c:'#e53935'});
+  s+=`<path d="M${x0} 120V128H${x0+bw}V120" fill="none" stroke="${INK}" stroke-width="2.4"/>`+tx(x0+bw/2,148,'每份 '+a,{a:'middle',s:13})+tx(180,178,`共 ${b} 份，每份一樣多 → 用乘法`,{a:'middle',s:14});
+  return svg(196,s,`${b} 份，每份 ${a}`);
+}
+function arr(d,b,cin,p){
+  const w=24,h=16,g=4;let s='',y=34;
+  s+=tx(180,20,`${d} 個「${VAL[p]}」× ${b} 組`,{a:'middle',s:15});
+  const cols=Math.max(d,1),x0=(360-cols*(w+g)+g)/2;
+  if(d>0)for(let r=0;r<b;r++){for(let c=0;c<d;c++)s+=tok(x0+c*(w+g),y,p);y+=h+g+2}
+  else{s+=tx(180,y+14,'0 個，沒有東西',{a:'middle',s:14,c:'#78909c'});y+=26}
+  if(cin>0){s+=tx(14,y+12,'進位來的：',{s:12});for(let c=0;c<cin;c++)s+=tok(96+c*(w+g),y,p,{ring:1});y+=h+8}
+  return svg(y+8,s,`${d} 個${NM[p]} 乘 ${b}`);
+}
+function reg(total,p){
+  const f=Math.floor(total/10),r=total%10,w=24,h=16,g=3;let s='',y=14;
+  for(let i=0;i<f;i++){
+    for(let c=0;c<10;c++)s+=tok(10+c*(w+g),y+3,p);
+    s+=`<rect x="6" y="${y-1}" width="${10*(w+g)+4}" height="${h+8}" rx="8" fill="none" stroke="#e53935" stroke-width="2" stroke-dasharray="5 3"/>`;
+    s+=`<path d="M${10*(w+g)+14} ${y+11}H${10*(w+g)+34}" stroke="${INK}" stroke-width="2.4"/><path d="M${10*(w+g)+34} ${y+11}l-6-5v10z" fill="${INK}"/>`;
+    s+=tok(10*(w+g)+40,y+1,p+1,{w:36,h:20});
+    y+=h+12;
+  }
+  if(r>0){for(let c=0;c<r;c++)s+=tok(10+c*(w+g),y+3,p);y+=h+12}
+  s+=tx(180,y+14,`10 個「${VAL[p]}」換成 1 個「${VAL[p+1]}」${r?`，剩下 ${r} 個`:''}`,{a:'middle',s:13});
+  return svg(y+26,s,`${total} 個${NM[p]}滿十換大`);
+}
+function vf(a,b,ans,st){
+  const N=String(ans).length,ds=String(a).split('').reverse();
+  const cell=(t,cls)=>`<span class="vc ${cls||''}">${t}</span>`;
+  let h='<div class="vf" style="grid-template-columns:repeat('+(N+1)+',2.1em)">';
+  h+=cell('');for(let p=N-1;p>=0;p--)h+=cell(st.car[p]!==undefined&&st.car[p]!==''?st.car[p]:'','cr'+(st.hl===p?' hl':''));
+  h+=cell('');for(let p=N-1;p>=0;p--)h+=cell(ds[p]!==undefined?ds[p]:'',st.hl===p?'hl':'');
+  h+=cell('×');for(let p=N-1;p>=0;p--)h+=cell(p===0?b:'');
+  h+='<span class="vl" style="grid-column:1/-1"></span>';
+  h+=cell('');for(let p=N-1;p>=0;p--)h+=cell(st.res[p]!==undefined?st.res[p]:'','rs'+(st.hl===p?' hl':''));
+  return h+'</div>';
+}
+function steps(q){
+  const m=parse(q);if(!m)return null;
+  const {a,b,ans}=m,ds=String(a).split('').reverse().map(Number),k=ds.length-1,est=Math.round(a/10**k)*10**k;
+  const out=[],res=[],car=[];const S0=()=>({res:res.slice(),car:car.slice(),hl:-1});
+  out.push({title:m.word?'先看懂題目':'這題在算什麼？',text:`把 ${b} 個 ${a} 合起來，就是 ${a} × ${b}。`,vis:bar(a,b),st:S0()});
+  out.push({title:'先估一估',text:`${a} 接近 ${est}，${est} × ${b} ＝ ${est*b}。所以答案應該會接近 ${est*b}。`,vis:'',big:`${a} ≈ ${est}\n${est} × ${b} ≈ ${est*b}`,st:S0()});
+  let c=0;
+  for(let i=0;i<ds.length;i++){
+    const d=ds[i],tot=d*b+c,r=tot%10,nc=Math.floor(tot/10),last=i===ds.length-1;
+    car[i]=c?c:'';
+    const base=`${PN[i]}：${d} 個「${VAL[i]}」× ${b} 組${c?`，再加進位來的 ${c} 個`:''}，一共 ${tot} 個「${VAL[i]}」。`;
+    if(tot>=10){
+      out.push({title:`${PN[i]}先算`,text:base,vis:arr(d,b,c,i),st:{res:res.slice(),car:car.slice(),hl:i}});
+      const rr=res.slice();
+      if(last){String(tot).split('').reverse().forEach((x,j)=>rr[i+j]=x)}else rr[i]=String(r);
+      const cc=car.slice();if(!last)cc[i+1]=nc;
+      out.push({title:`${PN[i]}：滿十要換大`,text:last?`${tot} 個「${VAL[i]}」，滿 10 個換成 1 個「${VAL[i+1]}」，所以寫 ${tot}。`:`滿 10 個「${VAL[i]}」換成 1 個「${VAL[i+1]}」，這一位剩 ${r}，寫 ${r}；進位 ${nc} 到${PN[i+1]}。`,vis:reg(tot,i),st:{res:rr,car:cc,hl:i}});
+      if(last)res[i]=undefined,String(tot).split('').reverse().forEach((x,j)=>res[i+j]=x);else{res[i]=String(r);car[i+1]=nc}
+      c=last?0:nc;
+    }else{
+      res[i]=String(tot);car[i+1]='';
+      out.push({title:`${PN[i]}`,text:base+`不滿 10，不用進位，直接寫 ${tot}。`,vis:arr(d,b,c,i),st:{res:res.slice(),car:car.slice(),hl:i}});
+      c=0;
+    }
+  }
+  out.push({title:'合起來',text:`${a} × ${b} ＝ ${ans}。和估算的 ${est*b} 很接近，合理！`,vis:'',st:{res:res.slice(),car:car.slice(),hl:-1},big:`${a} × ${b} ＝ ${ans}`});
+  out.forEach(s=>{if(!s.vis)s.vis='';s.vf=vf(a,b,ans,s.st)});
+  return out;
+}
+return {steps,parse};})();
+
+
 const EX=[
 {sub:'cn',t:'第三課 繞口令村：重點整理',en:'國語範例（課文與詞語）',pg:'',ic:'📖',c:SUB.cn.c,m:['info','cards','talk','tf','match','parent'],
  info:{h:'第三課 繞口令村 重點',r:[["課文大意：旅行家小金遇到暴風雨，船迷失了方向，來到一個叫繞口令村的地方，在那裡留下難忘的回憶。","記敘文（故事）"],["詞語：迷失、老闆、繞口令。","要能說出意思"],["字形比較：暴／瀑、迷／謎、參觀的「觀」。","注意不同的部件"],["句型：由於……，因此……","表示原因和結果"],["成語：隨機應變、腳踏實地。","要會用在句子裡"]]},
@@ -181,32 +391,34 @@ const EX=[
     ["一年以 365 天計算，小美剛滿 3 歲，大約是出生滿幾天？",1095,"365 × 3",["365 × 3","個位：5 × 3 ＝ 15，寫 5、進 1","十位：6 × 3 ＝ 18，加 1 ＝ 19，寫 9、進 1","百位：3 × 3 ＝ 9，加 1 ＝ 10","答：1095 天"]]],
  parent:["請孩子先說出「這題要用乘法，因為……」，再動手算。","整百、中間有 0 的題目容易出錯，請孩子多練習並說出每一位的算法。"]},
 {sub:'sci',t:'植物的葉、莖、根',en:'自然範例（1-2）',pg:'',ic:'🍃',c:SUB.sci.c,m:['info','cards','talk','tf','match','parent'],
- info:{h:'葉、莖、根的重點',r:[["葉序有三種：互生、對生、輪生。","看 1 個節上長出幾片葉子"],["莖可分成草本莖、木本莖和藤本莖。","藤本莖會攀爬或纏繞"],["根可以固定植物，吸收水分和養分。","根有軸根和鬚根"]]},
- w:[['葉序','葉子在莖的節上的排列方式','🍃'],['節','莖上長出葉子的位置','📍'],['互生','1 個節上長 1 片葉子，交互排列（例如楓香）','↔️'],['對生','1 個節上長 2 片葉子，相對生長（例如番石榴）','🔀'],['輪生','1 個節上長 3 片或以上的葉子（例如黑板樹）','🎡'],['草本莖','莖較柔軟，大多直立生長','🌿'],['軸根','有一條粗大的主根（例如小白菜、菠菜）','🥬'],['鬚根','由許多細小的根組成（例如蔥、水稻）','🌾']],
- d:[["葉子生長在莖上的位置，稱為什麼？","","節","葉子長在莖的節上。",["點","環"]],
+ info:{h:'葉、莖、根的重點',img:['node','leafOrder','stems','taproot','fibrous'],r:[["葉序有三種：互生、對生、輪生。","看 1 個節上長出幾片葉子"],["莖可分成草本莖、木本莖和藤本莖。","藤本莖會攀爬或纏繞"],["根可以固定植物，吸收水分和養分。","根有軸根和鬚根"]]},
+ w:[['葉序','葉子在莖的節上的排列方式','🍃','leafOrder'],['節','莖上長出葉子的位置','📍','node'],['互生','1 個節上長 1 片葉子，交互排列（例如楓香）','↔️','alt'],['對生','1 個節上長 2 片葉子，相對生長（例如番石榴）','🔀','opp'],['輪生','1 個節上長 3 片或以上的葉子（例如黑板樹）','🎡','who'],['草本莖','莖較柔軟，大多直立生長','🌿','herb'],['軸根','有一條粗大的主根（例如小白菜、菠菜）','🥬','taproot'],['鬚根','由許多細小的根組成（例如蔥、水稻）','🌾','fibrous'],['木本莖','莖堅硬粗壯，可以長成大樹','🌳','tree'],['藤本莖','莖會攀爬或纏繞在其他物體上（例如牽牛花）','🌀','vine'],['葉緣平滑','葉子邊緣沒有缺刻，摸起來光滑（例如福木）','🌱','leafEdge']],
+ d:[["葉子生長在莖上的位置，稱為什麼？","","節","葉子長在莖的節上。",["點","環"],"node"],
     ["植物的根有哪些主要功能？","","固定植物，吸收水分和養分","根把植物固定在土裡，還能吸收水和養分。",["製造氧氣","吸引小動物"]],
     ["連接葉與根，並且能支撐植物身體的是哪個部位？","","莖","莖支撐植物，也運送水分和養分。",["花","葉"]],
-    ["下面哪一個是草本莖植物的特徵？","","大多直立生長","草本莖比較柔軟，大多直立生長。",["莖通常粗壯","通常比較高大"]]],
- tf:[["植物的葉子通常會互相錯開生長，是為了吸引小動物。",false,"錯開生長是為了讓每片葉子都能照到陽光。"],["葉子在節上不同的排列方式，稱為葉序。",true,"互生、對生、輪生都是葉序。"],["牽牛花的莖會攀爬或纏繞在其他物體上，是藤本莖。",true,"藤本莖會攀爬或纏繞。"],["莧菜的根是鬚根。",false,"莧菜是軸根；蔥和水稻才是鬚根。"],["植物的根可以吸收土壤裡的水分和養分。",true,"這是根的主要功能之一。"]],
+    ["下面哪一個是草本莖植物的特徵？","","大多直立生長","草本莖比較柔軟，大多直立生長。",["莖通常粗壯","通常比較高大"],"stems"]],
+ tf:[["植物的葉子通常會互相錯開生長，是為了吸引小動物。",false,"錯開生長是為了讓每片葉子都能照到陽光。"],["葉子在節上不同的排列方式，稱為葉序。",true,"互生、對生、輪生都是葉序。","leafOrder"],["牽牛花的莖會攀爬或纏繞在其他物體上，是藤本莖。",true,"藤本莖會攀爬或纏繞。","vine"],["莧菜的根是鬚根。",false,"莧菜是軸根；蔥和水稻才是鬚根。","taproot"],["植物的根可以吸收土壤裡的水分和養分。",true,"這是根的主要功能之一。"]],
  mt:[["番石榴","對生"],["楓香","互生"],["黑板樹","輪生"],["小白菜","軸根"],["蔥","鬚根"],["福木","葉緣平滑"]],
  parent:["到公園找三種植物，數一數同一個節長出幾片葉子，判斷是互生、對生還是輪生。","洗菜時，請孩子看看蔥和小白菜的根，說說哪個是軸根、哪個是鬚根。"]},
-{sub:'sci',t:'植物的花、果實、種子',en:'自然範例（1-3）',pg:'',ic:'🌸',c:SUB.sci.c,m:['info','cards','talk','tf','match','parent'],
- info:{h:'花、果實、種子的重點',r:[["花的構造有花萼、花瓣、雄蕊和雌蕊。","各有不同的功能"],["雌蕊可以發育成果實，果實裡通常有種子。","果實包著種子"],["植物能提供食物和棲息地，也能製成紙張、建材，還能美化環境。","植物的用途"],["珍惜植物資源：多種樹、做好資源回收，不隨意摘花。","愛護植物"]]},
- w:[['花萼','包在花的外面，保護花瓣','🌺'],['花瓣','常有鮮豔的顏色或香氣，吸引動物幫忙傳播花粉','🌸'],['雄蕊','產生花粉','🌼'],['雌蕊','可以發育成果實','🌷'],['果實','由雌蕊發育而成，裡面通常有種子','🍑'],['種子','可以長成新的植物','🌰'],['傳播花粉','動物或風幫忙，讓花粉到雌蕊上','🐝']],
- d:[["一朵花中，可以發育成果實的構造是哪一個？","","雌蕊","雌蕊會發育成果實。",["雄蕊","花瓣"]],
+{sub:'sci',t:'植物的花、果實、種子',en:'自然範例（1-3）',pg:'',ic:'🌸',c:SUB.sci.c,m:['info','cards','talk','tf','order','match','parent'],
+ info:{h:'花、果實、種子的重點',img:['flower','watermelon','seedGrow'],r:[["花的構造有花萼、花瓣、雄蕊和雌蕊。","各有不同的功能"],["雌蕊可以發育成果實，果實裡通常有種子。","果實包著種子"],["植物能提供食物和棲息地，也能製成紙張、建材，還能美化環境。","植物的用途"],["珍惜植物資源：多種樹、做好資源回收，不隨意摘花。","愛護植物"]]},
+ w:[['花萼','包在花的外面，保護花瓣','🌺','flower'],['花瓣','常有鮮豔的顏色或香氣，吸引動物幫忙傳播花粉','🌸','flower'],['雄蕊','產生花粉','🌼','flower'],['雌蕊','可以發育成果實','🌷','flower'],['果實','由雌蕊發育而成，裡面通常有種子','🍑','watermelon'],['種子','可以長成新的植物','🌰','seedGrow'],['傳播花粉','動物或風幫忙，讓花粉到雌蕊上','🐝']],
+ d:[["一朵花中，可以發育成果實的構造是哪一個？","","雌蕊","雌蕊會發育成果實。",["雄蕊","花瓣"],"flower"],
     ["花朵通常有香氣或鮮豔的顏色，主要目的是什麼？","","吸引動物幫忙傳播花粉","香氣和顏色能吸引動物。",["供人們觀賞","淨化空氣"]],
     ["植物的花，主要功能是哪一個？","","繁衍後代","花可以結成果實和種子，讓植物繁衍。",["固定植物","吸收養分"]],
-    ["綠豆莢和裡面的綠豆，分別是什麼？","","豆莢是果實，綠豆是種子","果實包著種子。",["豆莢是種子，綠豆是果實","兩個都是果實"]]],
- tf:[["所有植物開出的花朵，顏色和外形都完全相同。",false,"不同植物的花，顏色和外形都不同。"],["花萼可以保護花瓣。",true,"花萼包在花瓣外面，具有保護作用。"],["吃西瓜時，會發現種子裡有很多果實。",false,"是果實裡有很多種子。"],["果實成熟後可能有香氣，能吸引動物取食，幫助植物繁衍。",true,"動物吃果實，也幫忙傳播種子。"],["陶壺是用植物做成的。",false,"陶壺是用黏土燒成的，不是植物做的。"]],
+    ["綠豆莢和裡面的綠豆，分別是什麼？","","豆莢是果實，綠豆是種子","果實包著種子。",["豆莢是種子，綠豆是果實","兩個都是果實"],"pod"]],
+ tf:[["所有植物開出的花朵，顏色和外形都完全相同。",false,"不同植物的花，顏色和外形都不同。"],["花萼可以保護花瓣。",true,"花萼包在花瓣外面，具有保護作用。","flower"],["吃西瓜時，會發現種子裡有很多果實。",false,"是果實裡有很多種子。","watermelon"],["果實成熟後可能有香氣，能吸引動物取食，幫助植物繁衍。",true,"動物吃果實，也幫忙傳播種子。"],["陶壺是用植物做成的。",false,"陶壺是用黏土燒成的，不是植物做的。"]],
+ so:[["開花 結成果實 果實裡有種子 種子發芽 長成新植物","植物生長的順序","v2"],["花瓣 吸引 動物 幫忙 傳播花粉","把詞語排成句子","v1"]],
  mt:[["花萼","保護花瓣"],["花瓣","吸引動物"],["雄蕊","產生花粉"],["雌蕊","發育成果實"],["種子","長成新的植物"],["棉花","製成保暖的衣服"]],
  parent:["找一朵花（或照片），請孩子指出花萼、花瓣、雄蕊和雌蕊。","切開一個水果，請孩子找出果實和種子，說說它們的差別。"]},
-{sub:'soc',t:'我們的社區',en:'社會範例',pg:'',ic:'🏘️',c:SUB.soc.c,m:['info','cards','talk','tf','match','parent'],
+{sub:'soc',t:'我們的社區',en:'社會範例',pg:'',ic:'🏘️',c:SUB.soc.c,m:['info','cards','talk','tf','order','match','parent'],
  info:{h:'認識社區',r:[["社區是人們居住、生活的地方。","大家互相幫助"],["社區裡有各種場所，各有不同的功能。","學校、公園、市場、郵局…"],["愛護社區，大家都有責任。","不亂丟垃圾、遵守規則"]]},
  w:[['學校','學習和交朋友的地方','🏫'],['公園','散步、運動、休閒的地方','🌳'],['警察局','維護安全、協助民眾','👮'],['市場','買菜和生活用品的地方','🛒'],['郵局','寄信和寄包裹','📮'],['醫院','生病時看醫生','🏥']],
  d:[["想寄一封信，要到哪裡？","","郵局","郵局負責寄信和包裹。",["市場","公園"]],
     ["在路上迷路了，可以請誰幫忙？","","警察","警察可以協助迷路的人。",["隨便找路人帶路","自己亂走"]],
     ["生病不舒服時，要去哪裡看醫生？","","醫院","醫院有醫生可以治療。",["郵局","公園"]]],
  tf:[["社區裡的公園，是大家可以一起使用的地方。",true,"公園是公共空間，大家要愛護、遵守規則。"],["在社區裡，可以隨意把垃圾丟在路邊。",false,"要維護環境整潔，垃圾要丟進垃圾桶。"],["警察局可以協助民眾解決安全問題。",true,"警察負責維護社會秩序與安全。"]],
+ so:[["迷路時 可以 請 警察 幫忙","把詞語排成句子","v1"],["想寄信 先 到 郵局 買 郵票","把詞語排成句子","v2"]],
  mt:[["學校","學習知識"],["郵局","寄信和包裹"],["市場","買菜和日用品"],["醫院","治療生病的人"]],
  parent:["散步時，請孩子指出附近三個場所，說說它們的功能。","討論：我們可以怎麼愛護社區？請孩子說出兩件做得到的事。"]}
 ];
@@ -217,32 +429,44 @@ const saveLS=()=>{try{localStorage.setItem('english-park-lessons',JSON.stringify
 const COL=['#ffb347','#f59bbd','#6ec6ff','#7bd36f','#b794f6','#ffd84d'];
 const ML={cards:['📇','單字卡','看圖、聽發音'],info:['📖','重點整理','點一下就能聽'],listen:['🔊','聽音選圖','聽到內容，點出正確的圖'],blend:['🔤','聽音選字母組合','聽單字，選開頭 sm／sn／sw／sl'],talk:['💬','對話挑戰','選出正確的回答'],dream:['🌟','我的夢想職業','What do you want to be?']};
 const SM=['listen','blend','talk','dict','order','tf','calc','match'];
-ML.tf=['⭕','是非題','判斷對或錯'];ML.calc=['🧮','計算練習','算出答案，看解法'];ML.match=['🔗','配對遊戲','把相關的連起來'];
+ML.tf=['⭕','是非題','判斷對或錯'];ML.calc=['🧮','計算練習','每次換新數字，不會算就按「教我怎麼算」'];ML.match=['🔗','配對遊戲','把相關的連起來'];
 function lab(m,s){const k=sk(s);
   if(m==='cards')return {en:['📇','單字卡','看圖、聽發音'],cn:['🀄','生字詞卡','看注音、學詞語'],math:['📐','概念與公式卡','先看懂觀念'],sci:['🔬','概念卡','認識重要名詞'],soc:['🗺️','概念卡','認識重要名詞']}[k];
   if(m==='talk')return k==='en'?ML.talk:['✅','選擇題練習','選出正確答案'];
   if(m==='info')return k==='math'?['🪜','解題步驟','步驟與注意事項']:['📖','重點整理','點一下就能聽'];
+  if(m==='order'&&k!=='en')return k==='cn'?['🧩','語句重組','把詞語排成通順的句子']:['🧩','排排看','把步驟或詞語排成正確順序'];
   return ML[m]}
 ML.parent=['👨‍👩‍👧','親子共學任務','爸媽陪孩子一起做'];
 ML.dict=['✍️','聽寫練習','聽發音，拼出單字'];
 ML.order=['🧩','句子重組','把單字排成正確的句子'];
-const AIPROMPT=`你是台灣國小老師。附上的是國小課本或習作的頁面照片（可能橫放、歪斜，頁面上常有學生寫的答案或老師的批改記號，那些不一定正確，請你自己依題目、課文與學科常識判斷正確答案）。請先判斷科目（英文 en、國語 cn、數學 math、自然 sci、社會 soc），依科目特性製作課後輔導教材，用繁體中文（台灣用語）。
-只回傳一個 JSON 物件，不要 markdown，格式為 {"lessons":[...]}。每個元素代表頁面中的一個單元或主題（同一回或同一課的內容放在同一個元素），格式：
+const AIPROMPT=`你是台灣國小老師，要把課本或習作（學習評量）的頁面照片，做成讓孩子「真的看懂」的課後輔導教材。用繁體中文（台灣用語）。
+【讀照片的規則】（最重要）
+1. 只讀「印刷」的內容：課文、題目、選項、圖說、表格。
+2. 完全忽略：學生手寫的答案、鉛筆或原子筆的劃記與圈選、老師的紅筆批改（打勾、打叉、分數、評語）、貼紙、塗鴉。手寫答案可能是錯的，絕對不可當成正確答案；正確答案要依題目和學科知識自己判斷。
+3. 題目被手寫字遮住或看不清時，依課本脈絡還原；真的無法還原就略過。
+4. 題目盡量照課本「原樣」還原（文字可略為簡化），這些是「課本原題」。照片裡的圖，改用文字描述成題目。
+【題目要靈活、多元，不是死背答案】
+- 先還原課本原題（標記 o）；再依同樣的題型與觀念做「變化題」（標記 v）：換名詞（例如蘋果換成橘子）、換情境、換數量，觀念相同但答案不同，讓孩子必須理解才答得出來。變化題的數字運算要自己算對。
+- 難度分三級：1 基礎（照課本、一個步驟）、2 進階（換情境、兩個步驟）、3 挑戰（綜合運用、需要推理）。挑戰題仍不可超出照片頁面的學習範圍。
+- 每一題都要加「標記」：o1、o2、o3（課本原題的難度）或 v1、v2、v3（變化題的難度）。
+- 題型要多樣：選擇、是非、配對、排序、計算與應用題。
+先判斷科目（英文 en、國語 cn、數學 math、自然 sci、社會 soc）。只回傳一個 JSON 物件，不要 markdown，格式為 {"lessons":[...]}。每個元素代表一個單元或主題（同一回或同一課的內容放在同一個元素），格式：
 {"sub":"en|cn|math|sci|soc","t":"中文標題（可含回次或課名）","en":"簡短副標題","pg":"頁碼或空字串","ic":"一個emoji",
-"w":[["詞語","解釋","一個代表的emoji（同一段內不可重複）"]],
-"d":[["題目","提示（可空字串）","正確答案","為什麼（一句話）",["明顯錯誤的選項1","明顯錯誤的選項2"]]],
-"tf":[["一個敘述",true,"為什麼（一句話）"]],
-"calc":[["數學題目",48,"提示",["解題步驟1","解題步驟2"]]],
+"w":[["詞語","解釋","一個代表的emoji（同一段內不可重複）","圖庫代碼（沒有就空字串）"]],
+"d":[["題目","提示（可空字串）","正確答案","為什麼（一句話）",["錯誤選項1","錯誤選項2","錯誤選項3"],"圖庫代碼（沒有就空字串）","標記"]],
+"tf":[["一個敘述",true,"為什麼（一句話）","圖庫代碼（沒有就空字串）","標記"]],
+"calc":[["數學題目",48,"提示",["解題步驟1","解題步驟2"],"標記"]],
 "mt":[["左邊","右邊"]],
+"so":[["詞語1 詞語2 詞語3 詞語4","提示","標記"]],
 "info":{"h":"標題","r":[["重點","補充說明（可空字串）"]]},
 "parent":["給家長的中文任務，說明可以怎麼陪孩子練習"]}
-calc 的答案只能是單一數字（不含單位）。
+calc 的答案只能是單一數字（不含單位）。so 是排序題：把一個通順的句子，或一段過程的步驟，拆成 3 到 7 個詞語，詞語之間用空格，順序是正確答案。錯誤選項必須真的錯誤。
 各科規則：
 - 英文：w 放英文單字或句型（解釋用中文）；d 為對話問答；只用照片裡真的出現的內容。
-- 國語：頁面常見「課文大意、詞語解釋、字音字形比較、語句練習、成語、綜合練習」。w 放生字詞，解釋寫成「注音｜意思」；d 出詞義、字形辨別（選出正確的字）、選詞填空、名詞判斷等選擇題；tf 依課文內容出是非題；mt 做「詞語配對意思」或「部件相加成字」；info 放課文大意與重點。需要手寫的題目（寫國字、造句）請改成選擇題或配對。
-- 數學：w 放重要概念；info 放解題步驟與常犯錯誤；d 出觀念選擇題；calc 先放照片上的計算題與應用題（照原題數字，題目文字可簡化），再加 2 到 3 題換數字的類似題；步驟要清楚（直式要寫每一位的算法）。不要放 tf 和 mt。
-- 自然、社會：w 放重要名詞與解釋；d、tf 出題；mt 做「名詞配對說明」或「植物配特徵」；info 放重點整理。圖片題請改用文字描述，例如「番石榴的葉序是哪一種」。
-- 數量：w 最多 12 筆；d 3 到 8 題；tf 3 到 6 題；mt 4 到 6 組（右邊不可重複）；calc 最多 12 題；parent 2 到 3 筆，要具體、好執行、不需要買東西。沒有適合內容的欄位可省略。錯誤選項必須真的錯誤。`;
+- 國語：頁面常見「課文大意、詞語解釋、字音字形比較、語句練習、成語、綜合練習」。w 放生字詞，解釋寫成「注音｜意思」；d 出詞義、字形辨別、選詞填空、名詞判斷；tf 依課文內容出是非題；mt 做「詞語配對意思」或「部件相加成字」；so 做「語句重組」（把詞語排成通順的句子）；info 放課文大意與重點。需要手寫的題目（寫國字、造句）請改成選擇、配對或排序。
+- 數學：w 放重要概念；info 放解題步驟與常犯錯誤；d 出觀念選擇題；calc 放課本的計算題與應用題（標 o，照原題數字），再加 3 到 5 題換名詞、換數字、不同難度的變化題（標 v）；乘法題的第一個步驟請寫成「36 × 2」這樣的算式（兩個整數相乘，乘數 2 到 9），App 會自動畫出積木與直式圖解，並自動產生更多換數字的練習。不要放 tf 和 mt。
+- 自然、社會：w 放重要名詞與解釋；w 的第 4 個欄位可填「圖庫代碼」讓 App 畫出示意圖，只有名詞和代碼的意思完全相同才填，不確定就空字串，不可自己編代碼：node（節）、leafOrder（葉序總覽）、alt（互生）、opp（對生）、who（輪生）、herb（草本莖）、tree（木本莖）、vine（藤本莖）、taproot（軸根）、fibrous（鬚根）、flower（花的構造：花萼花瓣雄蕊雌蕊）、watermelon（果實裡有種子）、pod（豆莢與豆）、seedGrow（種子發芽長大）、leafEdge（葉緣平滑與鋸齒）；d、tf 出題（d、tf 也可填圖庫代碼）；mt 做「名詞配對說明」或「植物配特徵」；so 可排「過程的順序」；info 放重點整理。圖片題請改用文字描述，例如「番石榴的葉序是哪一種」。
+- 數量（頁面內容夠的話）：w 最多 16 筆；d 8 到 15 題；tf 5 到 10 題；mt 4 到 8 組（右邊不可重複）；calc 最多 12 題；so 2 到 6 題；parent 2 到 3 筆，要具體、好執行、不需要買東西。沒有適合內容的欄位可省略。`;
 const GM=['gemini-3.6-flash','gemini-3.5-flash','gemini-3.1-flash-lite-preview','gemini-2.5-flash'];
 let SMP=null;try{claude.use('sample').then(s=>{SMP=s}).catch(()=>{})}catch(e){}
 const dataBlob=u=>{const m=u.match(/^data:([^;]+);base64,(.+)$/),b=atob(m[2]),a=new Uint8Array(b.length);for(let i=0;i<b.length;i++)a[i]=b.charCodeAt(i);return new Blob([a],{type:m[1]})};
@@ -288,45 +512,106 @@ function diary(){
   <details class="how" style="margin:16px 0 12px" open><summary>📚 各科範例課程</summary><div style="margin-top:12px">${smp.length?list(smp):'<p class="sub">這個科目還沒有範例。</p>'}</div></details>`}
 function timeBar(){const m=Math.floor((T[day()]||0)/60),p=Math.min(100,Math.round(m/GOAL*100));return `<div class="tb"><div class="tbi" style="width:${p}%"></div></div><p class="sub" style="margin:6px 0 0">今天學了 ${m} / ${GOAL} 分鐘${m>=GOAL?'　🎉 達標！可以休息囉':''}</p>`}
 function addBtn(){return `<button class="go" data-a="add" style="margin:0 0 14px">📝 建立今天的作業課程</button>`}
-function parentBox(){return `<details class="how" style="margin-bottom:12px"><summary>👨‍👩‍👧 家長專區</summary><p>每日學習目標（分鐘）</p><div class="nav" style="margin:0 0 10px">${[10,15,20,30].map(g=>`<button class="go ${g===GOAL?'':'alt'}" style="margin:0" data-a="goal" data-g="${g}">${g}</button>`).join('')}</div><p>打開並使用本頁的時間，會自動計入今天的學習時間。</p><p style="margin-bottom:6px"><b>AI 辨識設定</b>（照片會傳到 AI 服務處理）</p><p class="sub" style="margin:0 0 8px">免費做法：用 Google 帳號到 aistudio.google.com，按「Get API key」建立金鑰（AIza 開頭），貼在下方第一欄，通關碼留空。免費版的內容 Google 可能用來改善產品，請留意孩子的照片。</p><input id="aiu" class="ti" style="font-size:1rem;text-align:left" placeholder="貼上 Google Gemini 金鑰（AIza 或 AQ. 開頭）、Claude 金鑰或服務網址" value="${AI.url}"><input id="aic" class="ti" style="font-size:1rem;text-align:left;margin:8px 0 10px" placeholder="通關碼（只有用服務網址時才需要）" value="${AI.code}"><button class="go alt" style="margin:0 0 12px" data-a="aisave">儲存設定</button><button class="go alt" style="margin:0 0 8px" data-a="aitest">🔍 測試金鑰</button><p id="aits" class="sub" style="margin:0 0 12px;word-break:break-all"></p>${LS.length?'<button class="go alt" data-a="clr">清除我建立的課程</button>':''}</details>`}
+function parentBox(){return `<details class="how" style="margin-bottom:12px"><summary>👨‍👩‍👧 家長專區</summary><p>每日學習目標（分鐘）</p><div class="nav" style="margin:0 0 10px">${[10,15,20,30].map(g=>`<button class="go ${g===GOAL?'':'alt'}" style="margin:0" data-a="goal" data-g="${g}">${g}</button>`).join('')}</div><p>打開並使用本頁的時間，會自動計入今天的學習時間。</p><p style="margin-bottom:6px"><b>AI 辨識設定</b>（照片會傳到 AI 服務處理）</p>
+<details class="how" style="margin:0 0 12px;background:var(--paper);color:var(--onpaper)"><summary>🔑 第一次使用？3 分鐘取得免費 AI 金鑰</summary>
+<p style="margin:8px 0">App 本身不會看圖，是請 Google 的免費 AI「Gemini」幫忙讀作業照片。「金鑰」就像一張免費使用證，只要申請一次。</p>
+<ol>
+<li>用手機或電腦的瀏覽器打開 <b>aistudio.google.com</b>，用你的 Google 帳號登入（沒有帳號可以免費申請）。</li>
+<li>第一次進入如果出現使用條款，勾選同意。</li>
+<li>點「<b>Get API key</b>」（取得 API 金鑰），再點「<b>Create API key</b>」（建立金鑰）。如果問你要選專案，選「建立在新專案」。</li>
+<li>金鑰是一長串英文和數字（常以 AIza 或 AQ. 開頭）。<b>長按它，選「拷貝」</b>。</li>
+<li>回到這個 App 的家長專區，<b>貼到下面第一個欄位</b>，按「儲存設定」。</li>
+<li>按「🔍 測試金鑰」，看到 ✅ 就成功了。之後到首頁按「建立今天的作業課程」，選科目、選照片、按 ✨ 就可以。</li>
+</ol>
+<p style="margin:8px 0 0"><b>小提醒</b></p>
+<ul style="margin:4px 0 0;padding-left:1.2em">
+<li>金鑰像密碼：不要傳給別人，也不要截圖貼到網路上。它只存在這支手機的瀏覽器裡，換手機要重新貼一次。</li>
+<li>全程免費。<b>不要</b>開啟付費或綁信用卡，免費額度用完時只會暫停，隔天恢復。</li>
+<li>免費版的內容，Google 可能用來改善產品。拍照時避開孩子的姓名、學校和臉。</li>
+<li>畫面文字可能和上面略有不同，找「API key」相關按鈕即可。</li>
+</ul></details><input id="aiu" class="ti" style="font-size:1rem;text-align:left" placeholder="貼上 Google Gemini 金鑰（AIza 或 AQ. 開頭）、Claude 金鑰或服務網址" value="${AI.url}"><input id="aic" class="ti" style="font-size:1rem;text-align:left;margin:8px 0 10px" placeholder="通關碼（只有用服務網址時才需要）" value="${AI.code}"><button class="go alt" style="margin:0 0 12px" data-a="aisave">儲存設定</button><button class="go alt" style="margin:0 0 8px" data-a="aitest">🔍 測試金鑰</button><p id="aits" class="sub" style="margin:0 0 12px;word-break:break-all"></p>${LS.length?'<button class="go alt" data-a="clr">清除我建立的課程</button>':''}</details>`}
+const pvHtml=()=>aiBtn()+PF.map((f,k)=>`<div style="margin-bottom:16px"><p class="sub" style="margin:0 0 6px">第 ${k+1} 張</p><img src="${URL.createObjectURL(f)}" alt="作業照片 ${k+1}" style="width:100%;border-radius:16px;border:3px solid var(--line);margin-bottom:8px"><button class="go alt" data-a="paste" data-k="${k}" style="margin:0">📋 貼上第 ${k+1} 張的文字</button></div>`).join('');
+const subChips=()=>`<div class="chips2" id="sc">${[['','🤖','讓 AI 判斷']].concat(Object.keys(SUB).map(k=>[k,SUB[k].ic,SUB[k].n])).map(x=>`<button class="chip ${(S.asub||'')===x[0]?'on':''}" data-a="asub" data-f="${x[0]}">${x[1]} ${x[2]}</button>`).join('')}</div>`;
 function add(){return `${back('home','回到首頁')}<h2>📝 建立今天的作業課程</h2>
-<ol><li>按「拍照或選擇作業照片」，<b>可以一次選很多張</b>。若已設定 AI，按「✨ AI 一次辨識」就會全部自動做成課程；沒有的話，用下面的方式貼上文字。</li><li><b>iPhone／iPad：長按每張照片上的英文，選「拷貝」</b>（蘋果內建文字辨識，最準確）。Android：用 Google 智慧鏡頭選取並複製。</li><li>在那張照片下面按「📋 貼上」，文字會依序加到最下方的欄位。全部貼完、檢查後，按「做成課程」。每行一個單字或句子；想加中文可寫成：apple 蘋果</li></ol>
+<p style="margin:0 0 6px"><b>① 這批照片是哪一科？</b></p>${subChips()}<p class="sub" style="margin:6px 0 14px">選好科目，AI 會把這批照片整合成「一個」${S.asub&&SUB[S.asub]?SUB[S.asub].n:'科目'}單元；同一天同一科再上傳，內容會自動併進去，重複的會去掉。</p>
+<p style="margin:0 0 6px"><b>② 這是課本還是習作？</b></p><div class="chips2" id="mc">${[['','🤖','讓 AI 判斷'],['book','📘','課本'],['work','📝','習作／學習評量']].map(x=>`<button class="chip ${(S.amat||'')===x[0]?'on':''}" data-a="amat" data-f="${x[0]}">${x[1]} ${x[2]}</button>`).join('')}</div><p class="sub" style="margin:6px 0 14px">課本：重點放在看懂概念。習作：會還原每一題，再做換名詞、換數字的變化題。</p>
+<p style="margin:0 0 6px"><b>③ 選照片，按 ✨ 辨識</b></p>
+<p class="sub" style="margin:0 0 10px">一次可選很多張。要先到首頁「家長專區」貼上免費 AI 金鑰（只要設定一次）。<br>還沒設定 AI 的話，可以用最下方的「貼文字」做英文單字課：長按照片上的英文 → 拷貝 → 按該張下方「📋 貼上」。</p>
 <label class="go" style="cursor:pointer;margin:0 0 12px">📸 拍照或選擇作業照片（可多選）<input id="ph" type="file" accept="image/*" multiple hidden></label>
-<div id="pv"></div>
+<div id="pv">${PF.length?pvHtml():''}</div>
 <p id="os" class="sub" style="margin:0 0 12px">提示：照片拍得越正、越清楚，結果越好。</p>
 <input id="lt" class="ti" placeholder="課程名稱，例如：Unit 2 單字" style="text-align:left;font-size:1.1rem">
 <textarea id="lx" class="ti" rows="9" style="text-align:left;font-size:1.1rem;margin-top:10px" placeholder="a cook&#10;a baker&#10;What does he do?&#10;He's a police officer."></textarea>
 <button class="go" data-a="mk">做成課程</button><p id="ps" class="fb"></p>`}
 function setOs(c,x){const o=document.getElementById('os');if(o){o.className=c;o.textContent=x}}
 const arr=x=>Array.isArray(x)?x:[];
+const DIAKW={'葉序':'leafOrder','節':'node','互生':'alt','對生':'opp','輪生':'who','草本莖':'herb','木本莖':'tree','藤本莖':'vine','軸根':'taproot','鬚根':'fibrous','花萼':'flower','花瓣':'flower','雄蕊':'flower','雌蕊':'flower','花的構造':'flower','果實':'watermelon','種子':'seedGrow','葉緣':'leafEdge','葉緣平滑':'leafEdge','葉緣鋸齒':'leafEdge'};
+const uniq=(a,k)=>{const s=new Set();return a.filter(x=>{const z=String(k(x)).replace(/\s+/g,'').toLowerCase();if(!z||s.has(z))return false;s.add(z);return true})};
+function modes(s){
+  const m=[];if(s.info&&s.info.r.length)m.push('info');if(s.w.length)m.push('cards');if(s.w.length>=4&&s.sub==='en')m.push('listen');if(s.d.length)m.push('talk');if(s.tf.length)m.push('tf');if(s.calc.length)m.push('calc');if(s.so&&s.so.length)m.push('order');if(s.mt.length>=3)m.push('match');if(s.parent.length)m.push('parent');
+  return m;
+}
+function clean(s){
+  s.w=uniq(s.w,x=>x[0]).slice(0,30);s.d=uniq(s.d,x=>x[0]).slice(0,60);s.tf=uniq(s.tf,x=>x[0]).slice(0,40);s.calc=uniq(s.calc,x=>x[0]).slice(0,60);s.mt=uniq(s.mt,x=>x[0]).filter((x,i,a)=>a.findIndex(y=>y[1]===x[1])===i).slice(0,10);
+  if(s.info)s.info.r=uniq(s.info.r,x=>x[0]).slice(0,12);
+  s.so=uniq(s.so||[],x=>x[0]).slice(0,12);s.parent=uniq(s.parent,x=>x).slice(0,5);
+  if(s.sub==='sci')s.w.forEach(x=>{if(!x[3]){const k=DIAKW[x[0].replace(/\s+/g,'')];if(k)x.push(k)}});
+  s.m=modes(s);return s;
+}
+function mergeL(a,b){
+  a.w=a.w.concat(b.w);a.d=a.d.concat(b.d);a.tf=a.tf.concat(b.tf);a.calc=a.calc.concat(b.calc);a.mt=a.mt.concat(b.mt);a.parent=a.parent.concat(b.parent);a.so=(a.so||[]).concat(b.so||[]);
+  if(b.info){if(a.info){a.info.r=a.info.r.concat(b.info.r);a.info.img=(a.info.img||[]).concat(b.info.img||[])}else a.info=b.info}
+  if(!a.pg&&b.pg)a.pg=b.pg;
+  return clean(a);
+}
+function ingest(list,forced){
+  /* 同一科目、同一天只留一個單元：同批的合併，也併進今天已有的同科目作業，重複的內容自動去掉 */
+  const td=iso(),out=[];
+  list.forEach(n=>{if(forced)n.sub=forced,n.lang=forced==='en'?'en':'zh',n.c=SUB[forced].c;n=clean(n);const g=out.find(x=>x.sub===n.sub);if(g)mergeL(g,n);else out.push(n)});
+  const fresh=[];let last=-1,added=0;
+  out.forEach(n=>{
+    const ex=SEC.find(s=>s.custom&&!s.del&&s.date===td&&s.sub===n.sub);
+    if(ex){mergeL(ex,n);last=SEC.indexOf(ex);added++}else{SEC.push(n);LS.push(n);fresh.push(n);last=SEC.length-1;added++}
+  });
+  saveLS();return {fresh,last,count:out.length};
+}
 function norm(s){
   if(!s||!s.t)return null;
   const sub=SUB[s.sub]?s.sub:(s.lang==='zh'?'cn':'en');
-  const w=arr(s.w).filter(x=>arr(x).length>=3).slice(0,16).map(x=>[String(x[0]),String(x[1]),String(x[2])]);
-  const d=arr(s.d).filter(x=>arr(x).length>=5&&arr(x[4]).length>=2).slice(0,10).map(x=>[String(x[0]),String(x[1]),String(x[2]),String(x[3]),x[4].slice(0,2).map(String)]);
-  const tf=arr(s.tf).filter(x=>arr(x).length>=2).slice(0,8).map(x=>[String(x[0]),x[1]===true||x[1]==='true'||x[1]==='對',String(x[2]||'')]);
-  const calcs=arr(s.calc).filter(x=>arr(x).length>=2).slice(0,12).map(x=>[String(x[0]),String(x[1]),String(x[2]||''),arr(x[3]).map(String)]);
+  const TAG=/^[ov][123]$/,key=a=>a.map(String).find(k=>DIA[k])||'',tag=a=>a.map(String).find(k=>TAG.test(k))||'';
+  const w=arr(s.w).filter(x=>arr(x).length>=3).slice(0,30).map(x=>[String(x[0]),String(x[1]),String(x[2]),...(x[3]&&DIA[x[3]]?[String(x[3])]:[])]);
+  const d=arr(s.d).filter(x=>arr(x).length>=5&&arr(x[4]).length>=2).slice(0,10).map(x=>[String(x[0]),String(x[1]),String(x[2]),String(x[3]),x[4].slice(0,3).map(String),key(x.slice(5)),tag(x.slice(5))]);
+  const tf=arr(s.tf).filter(x=>arr(x).length>=2).slice(0,8).map(x=>[String(x[0]),x[1]===true||x[1]==='true'||x[1]==='對',String(x[2]||''),key(x.slice(3)),tag(x.slice(3))]);
+  const calcs=arr(s.calc).filter(x=>arr(x).length>=2).slice(0,12).map(x=>[String(x[0]),String(x[1]),String(x[2]||''),arr(x[3]).map(String),tag(x.slice(4))]);
+  const so=arr(s.so).filter(x=>arr(x).length>=1&&String(x[0]).trim().split(/[\s｜|]+/).filter(Boolean).length>=3).slice(0,12).map(x=>[String(x[0]).trim().replace(/[｜|]+/g,' ').replace(/\s+/g,' '),String(x[1]||''),tag(x.slice(2))]);
   const mt=arr(s.mt).filter(x=>arr(x).length>=2).slice(0,6).map(x=>[String(x[0]),String(x[1])]);
   const r=s.info?arr(s.info.r).filter(x=>arr(x).length>=2).map(x=>x.slice(0,2).map(String)):[];
   const info=r.length?{h:String(s.info.h||'重點整理'),r}:null;
-  const par=arr(s.parent).map(String).slice(0,4);
+  const par=arr(s.parent).map(String).slice(0,5);
   const m=[];if(info)m.push('info');if(w.length)m.push('cards');if(w.length>=4&&sub==='en')m.push('listen');if(d.length)m.push('talk');if(tf.length)m.push('tf');if(calcs.length)m.push('calc');if(mt.length>=3)m.push('match');if(par.length)m.push('parent');
   if(!m.length)return null;
-  return {date:iso(),sub,lang:sub==='en'?'en':'zh',t:String(s.t),en:String(s.en||''),pg:String(s.pg||''),ic:String(s.ic||SUB[sub].ic),c:SUB[sub].c,m,w,d,tf,calc:calcs,mt,info,parent:par,custom:1};
+  return clean({date:iso(),sub,lang:sub==='en'?'en':'zh',t:String(s.t),en:String(s.en||''),pg:String(s.pg||''),ic:String(s.ic||SUB[sub].ic),c:SUB[sub].c,m,w,d,tf,calc:calcs,so,mt,info,parent:par,custom:1});
 }
-function shrink(f){return new Promise((ok,no)=>{const i=new Image(),u=URL.createObjectURL(f);i.onload=()=>{const s=Math.min(1,1600/Math.max(i.width,i.height)),c=document.createElement('canvas');c.width=Math.round(i.width*s);c.height=Math.round(i.height*s);c.getContext('2d').drawImage(i,0,0,c.width,c.height);URL.revokeObjectURL(u);ok(c.toDataURL('image/jpeg',.8))};i.onerror=no;i.src=u})}
+function shrink(f){return new Promise((ok,no)=>{const i=new Image(),u=URL.createObjectURL(f);i.onload=()=>{const s=Math.min(1,1400/Math.max(i.width,i.height)),c=document.createElement('canvas');c.width=Math.round(i.width*s);c.height=Math.round(i.height*s);c.getContext('2d').drawImage(i,0,0,c.width,c.height);URL.revokeObjectURL(u);ok(c.toDataURL('image/jpeg',.75))};i.onerror=no;i.src=u})}
 const aiBtn=()=>(AI.url||SMP)?'<button class="go" data-a="ai" style="margin:0 0 14px">✨ AI 一次辨識全部照片，直接做成課程</button>':'<p class="sub">（尚未設定 AI 辨識，請到首頁「家長專區」填寫，或用下方貼上文字）</p>';
-async function aiRun(){
-  if(!AI.url&&!SMP){setOs('fb oops','還沒設定 AI 服務，請到首頁「家長專區」填寫。');return}
-  if(!PF.length){setOs('fb oops','請先選擇照片。');return}
-  try{
-    setOs('sub','⏳ AI 正在閱讀 '+PF.length+' 張照片，請稍等 30～90 秒…（照片會傳到 AI 服務處理）');
-    const images=await Promise.all(PF.slice(0,8).map(shrink));
-    const ctl=new AbortController(),tm=setTimeout(()=>ctl.abort(),150000);
+const SUBQ=()=>S.asub&&SUB[S.asub]?`【重要】使用者指定這一批照片全部是「${SUB[S.asub].n}」（sub 必須是 "${S.asub}"）。請把所有照片的內容整合成「一個」單元，lessons 陣列只放 1 個元素；不同照片裡重複出現的詞語、題目只保留一次；不是這個科目的照片請略過。\n`:'同一個科目的多張照片請整合成同一個單元（同一科只回傳 1 個元素），重複出現的詞語、題目只保留一次。\n';
+const MATQ=()=>({book:'這批照片是【課本】：重點放在概念理解，info 與 w 要完整，題目偏向理解與應用。\n',work:'這批照片是【習作／學習評量】：請逐題還原每一個印刷題目（標記 o），再為每種題型做變化題（標記 v）。\n'}[S.amat]||'');
+async function gGen(md,body,ctl){
+  const r=await fetch('https://generativelanguage.googleapis.com/v1beta/models/'+md+':streamGenerateContent?alt=sse',{method:'POST',headers:{'content-type':'application/json','x-goog-api-key':AI.url},body,signal:ctl.signal});
+  if(!r.ok)return {ok:false,status:r.status,tx:await r.text()};
+  let txt='';
+  const eat=line=>{line=line.trim();if(line.startsWith('data:')){try{const d=JSON.parse(line.slice(5)),c=arr(d.candidates)[0];txt+=arr(c&&c.content&&c.content.parts).map(q=>q.text||'').join('')}catch(e){}}};
+  if(r.body&&r.body.getReader){const rd=r.body.getReader(),dec=new TextDecoder();let buf='';
+    for(;;){const x=await rd.read();if(x.done)break;buf+=dec.decode(x.value,{stream:true});let k;while((k=buf.indexOf('\n'))>=0){eat(buf.slice(0,k));buf=buf.slice(k+1)}}
+    eat(buf)}
+  else (await r.text()).split('\n').forEach(eat);
+  return {ok:true,status:200,txt};
+}
+async function aiCall(prompt,images,ctl,tm){
     let raw;
-    if(!AI.url&&SMP){
-      const lim=await SMP.limits();if(!lim.images)throw '這個環境不支援照片辨識';
-      const j=await SMP.json(AIPROMPT,{images:images.slice(0,lim.images.maxCount).map(dataBlob),modelTier:'default',cache:false});
+    if(SMP){
+      const lim=await SMP.limits();if(images.length&&!lim.images)throw '這個環境不支援照片辨識';
+      const j=await SMP.json(prompt,images.length?{images:images.slice(0,lim.images.maxCount).map(dataBlob),modelTier:'default',cache:false}:{modelTier:'default',cache:false});
       clearTimeout(tm);raw=Array.isArray(j)?j:j.lessons;
     }else if(!/^https?:\/\//i.test(AI.url)&&!/^sk-ant-/.test(AI.url)){
       const gp=images.map(u=>{const m=u.match(/^data:(image\/[a-z+.-]+);base64,(.+)$/i);return {inline_data:{mime_type:m[1],data:m[2]}}});
@@ -344,12 +629,11 @@ async function aiRun(){
         }
       }catch(e){if(e==='bad_key')throw e}
       for(const md of models){
-        const r=await fetch('https://generativelanguage.googleapis.com/v1beta/models/'+md+':generateContent',{method:'POST',headers:{'content-type':'application/json','x-goog-api-key':AI.url},body:JSON.stringify({contents:[{parts:[{text:AIPROMPT},...gp]}],generationConfig:{responseMimeType:'application/json',maxOutputTokens:8192,temperature:0.2}}),signal:ctl.signal});
-        const tx=await r.text();
-        if(r.ok){
-          let d=null;try{d=JSON.parse(tx)}catch(x){}
-          if(!d){last='收到的不是 AI 回答，而是網頁（'+md+'，HTTP '+r.status+'，開頭：'+tx.replace(/\s+/g,' ').slice(0,70)+'）';continue}
-          const c=arr(d.candidates)[0];txt=arr(c&&c.content&&c.content.parts).map(q=>q.text||'').join('');if(txt)break;last='AI 沒有回傳內容（'+md+'）';continue}
+        let r;
+        try{r=await gGen(md,JSON.stringify({contents:[{parts:[{text:prompt},...gp]}],generationConfig:{responseMimeType:'application/json',maxOutputTokens:16000,temperature:0.2}}),ctl)}
+        catch(e){if(ctl.signal.aborted)throw 'timeout';last='net';continue}
+        if(r.ok){txt=r.txt;if(txt)break;last='AI 沒有回傳內容（'+md+'）';continue}
+        const tx=r.tx;
         let msg='';try{msg=(JSON.parse(tx).error||{}).message||''}catch(x){msg=tx.replace(/\s+/g,' ').slice(0,70)}
         const cand=r.status===402?'nocredit':r.status===429?'quota':(/API key/i.test(msg)?'Google 回覆（HTTP '+r.status+'）：'+msg.slice(0,140):'HTTP '+r.status+' '+md+' '+msg.slice(0,90));
         if(r.status!==404||last==='fail')last=cand;
@@ -360,7 +644,7 @@ async function aiRun(){
       let j;try{j=JSON.parse(m[0])}catch(x){throw 'AI 回傳的內容格式不正確，請再按一次'}raw=Array.isArray(j)?j:j.lessons;
     }else if(/^sk-ant-/.test(AI.url)){
       const parts=images.map(u=>{const m=u.match(/^data:(image\/[a-z+.-]+);base64,(.+)$/i);return {type:'image',source:{type:'base64',media_type:m[1],data:m[2]}}});
-      const r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'content-type':'application/json','x-api-key':AI.url,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},body:JSON.stringify({model:'claude-sonnet-5-5',max_tokens:6000,messages:[{role:'user',content:[...parts,{type:'text',text:AIPROMPT}]}]}),signal:ctl.signal});
+      const r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'content-type':'application/json','x-api-key':AI.url,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},body:JSON.stringify({model:'claude-sonnet-5-5',max_tokens:12000,messages:[{role:'user',content:[...parts,{type:'text',text:prompt}]}]}),signal:ctl.signal});
       clearTimeout(tm);
       if(r.status===401)throw 'bad_key';
       const d=await r.json();if(!r.ok)throw 'fail';
@@ -374,15 +658,65 @@ async function aiRun(){
       if(!r.ok)throw d.error||'fail';
       raw=d.lessons;
     }
+  return raw;
+}
+const aiErr=e=>(e==='net'||/Failed to fetch|Load failed|NetworkError/i.test(String((e&&e.message)||e)))?'連不到 Google（Failed to fetch）。可能原因：① 你是在 Claude 裡面開的（那裡不能連 Google，請改用 GitHub 網址）；② 這個網路擋住 Google（校園網路、VPN、廣告攔截）；③ 網路不穩或照片太多，請一次只選 3 到 4 張再試。':e==='timeout'?'AI 想太久了。請一次只選 3 到 4 張照片再試一次。':(e&&e.code==='not_granted')?'需要您允許使用 Claude，才能辨識照片。':e==='nocredit'?'這把金鑰所在的 Google 專案是「付費模式」而且沒有餘額（Google 回報 402）。請到 aistudio.google.com 建立一個「沒有設定付費」的新專案，再建立新金鑰，貼到家長專區。':e==='quota'?'今天的免費額度用完，或按得太頻繁，請稍後再試。':e==='bad_key'?'金鑰不正確或額度不足，請到「家長專區」確認。':e==='bad_code'?'通關碼不正確，請到「家長專區」確認。':e==='empty'?'AI 讀了照片，但沒有整理出可用的內容。請換一頁，或拍得更清楚一點再試。':'AI 辨識沒有成功（原因：'+(e&&e.message?e.message:e)+'）。請把這行字拍給我。';
+
+const LVN=['','基礎','進階','挑戰'];
+async function aiMore(){
+  const idx=S.s,s=SEC[idx];if(!s||!s.custom)return;
+  if(!AI.url&&!SMP){setOs('fb oops','還沒設定 AI 服務，請到首頁「家長專區」填寫。');return}
+  S.mf=(document.getElementById('mf')||{value:S.mf||''}).value;
+  const n=S.mn||10,lv=S.ml||'';
+  const ctx={標題:s.t,科目:SUB[sk(s)].n,詞語:s.w.slice(0,24).map(x=>x[0]+'：'+x[1]),重點:s.info?s.info.r.map(x=>x[0]):[],已出過的選擇題:s.d.slice(0,30).map(x=>x[0]),已出過的是非題:s.tf.slice(0,20).map(x=>x[0]),已出過的計算題:s.calc.slice(0,20).map(x=>x[0])};
+  const prompt=`你是台灣國小老師。以下是孩子正在學的單元內容與已經出過的題目。請再出 ${n} 題新的練習題，用繁體中文（台灣用語）。
+要求：
+- 題型混合：d 選擇題、tf 是非題、so 排序題${sk(s)==='math'?'、calc 計算與應用題（數學以 calc 為主）':''}、mt 配對（可省略）。
+- 換名詞、換情境、換數量（例如蘋果換成橘子），觀念相同但答案不同，讓孩子必須理解；不可與已出過的題目重複。
+- 難度：${lv?LVN[lv]+'（標記 v'+lv+'）':'由易到難，混合 v1、v2、v3 三級（1 基礎、2 進階、3 挑戰）'}。挑戰題也不可超出這個單元的學習範圍。
+- 每一題都要加標記（v1、v2 或 v3）。數字運算必須自己算對。
+${S.mf&&S.mf.trim()?'- 家長特別想加強：'+S.mf.trim().slice(0,80)+'\n':''}只回傳一個 JSON：{"lessons":[{"sub":"${sk(s)}","t":"${s.t.replace(/"/g,'')}","d":[["題目","提示（可空字串）","正確答案","為什麼（一句話）",["錯誤選項1","錯誤選項2","錯誤選項3"],"","標記"]],"tf":[["敘述",true,"為什麼","","標記"]],"calc":[["題目",48,"提示",["解題步驟"],"標記"]],"so":[["詞語1 詞語2 詞語3","提示","標記"]],"mt":[["左","右"]]}]}。calc 答案只能是單一數字；乘法題第一個步驟寫成「36 × 2」。
+單元內容：
+${JSON.stringify(ctx)}`;
+  try{
+    setOs('sub','⏳ AI 正在出 '+n+' 題新題目，請稍等 20～60 秒…');
+    const ctl=new AbortController(),tm=setTimeout(()=>ctl.abort(),240000);
+    const raw=await aiCall(prompt,[],ctl,tm);
+    const list=arr(raw).map(x=>norm(Object.assign({},x,{sub:sk(s),t:x&&x.t||s.t}))).filter(Boolean);
+    if(!list.length)throw 'empty';
+    const cnt=o=>o.d.length+o.tf.length+o.calc.length+o.so.length+o.mt.length;
+    const before=cnt(s);
+    list.forEach(x=>mergeL(s,x));
+    saveLS();S.more=0;render();
+    setOs('good','✅ 新增了 '+(cnt(s)-before)+' 題（重複的已自動略過）。回到下面的練習，就會出現新題目。');
+  }catch(e){setOs('fb oops',aiErr(e))}
+}
+async function aiRun(){
+  if(!AI.url&&!SMP){setOs('fb oops','還沒設定 AI 服務，請到首頁「家長專區」填寫。');return}
+  if(!PF.length){setOs('fb oops','請先選擇照片。');return}
+  try{
+    setOs('sub','⏳ AI 正在閱讀 '+PF.length+' 張照片，請稍等 30～90 秒…（照片會傳到 AI 服務處理；超過 3 張會分批處理）');
+    const images=await Promise.all(PF.slice(0,12).map(shrink));
+    const CH=3,parts=[];for(let i=0;i<images.length;i+=CH)parts.push(images.slice(i,i+CH));
+    let raw=[];
+    for(let k=0;k<parts.length;k++){
+      if(parts.length>1)setOs('sub','⏳ AI 正在閱讀第 '+(k+1)+' / '+parts.length+' 批照片（每批 '+CH+' 張），請稍等…');
+      const ctl=new AbortController(),tm=setTimeout(()=>ctl.abort(),240000);
+      let got=null,err=null;
+      for(let tr=0;tr<2&&!got;tr++){try{got=await aiCall(AIPROMPT+SUBQ()+MATQ(),parts[k],ctl,tm)}catch(e){err=e;if(e!=='net'&&!/Failed to fetch|Load failed/i.test(String((e&&e.message)||e)))break}}
+      if(!got){if(raw.length)break;throw err||'fail'}
+      raw=raw.concat(arr(got));
+    }
     const list=arr(raw).map(norm).filter(Boolean);
     if(!list.length)throw 'empty';
     const ti=(document.getElementById('lt')||{value:''}).value.trim();
     if(ti&&list.length===1)list[0].t=ti;
-    list.forEach(s=>{SEC.push(s);LS.push(s)});saveLS();
-    S.s=SEC.length-list.length;S.v=list.length===1?'sec':'home';render();
-  }catch(e){setOs('fb oops',(e&&e.code==='not_granted')?'需要您允許使用 Claude，才能辨識照片。':e==='nocredit'?'這把金鑰所在的 Google 專案是「付費模式」而且沒有餘額（Google 回報 402）。請到 aistudio.google.com 建立一個「沒有設定付費」的新專案，再建立新金鑰，貼到家長專區。':e==='quota'?'今天的免費額度用完，或按得太頻繁，請稍後再試。':e==='bad_key'?'金鑰不正確或額度不足，請到「家長專區」確認。':e==='bad_code'?'通關碼不正確，請到「家長專區」確認。':e==='empty'?'AI 讀了照片，但沒有整理出可用的內容。請換一頁，或拍得更清楚一點再試。':'AI 辨識沒有成功（原因：'+(e&&e.message?e.message:e)+'）。請把這行字拍給我。')}
+    const r=ingest(list,S.asub||'');
+    PF=[];S.s=r.last;S.v=r.count===1?'sec':'home';render();
+  }catch(e){setOs('fb oops',aiErr(e))}
 }
 async function aiTest(k,out){
+  if(SMP){out.textContent='ℹ️ 你現在是在 Claude 裡面開啟這個 App：這裡的照片由 Claude 直接辨識，不需要金鑰；而且 Claude 的頁面不允許連到 Google，所以測試金鑰一定會顯示「Failed to fetch」。金鑰請放到你的 GitHub 網頁版再測試。';return}
   out.textContent='⏳ 測試中…';
   try{
     const lr=await fetch('https://generativelanguage.googleapis.com/v1beta/models?pageSize=200',{headers:{'x-goog-api-key':k}});
@@ -405,7 +739,7 @@ let PF=[];
 app.addEventListener('change',e=>{
   if(e.target.id==='ph'&&e.target.files.length){
     PF=[...e.target.files].slice(0,12);const pv=document.getElementById('pv');
-    if(pv)pv.innerHTML=aiBtn()+PF.map((f,k)=>`<div style="margin-bottom:16px"><p class="sub" style="margin:0 0 6px">第 ${k+1} 張</p><img src="${URL.createObjectURL(f)}" alt="作業照片 ${k+1}" style="width:100%;border-radius:16px;border:3px solid var(--line);margin-bottom:8px"><button class="go alt" data-a="paste" data-k="${k}" style="margin:0">📋 貼上第 ${k+1} 張的文字</button></div>`).join('');
+    if(pv)pv.innerHTML=pvHtml();
     setOs('sub','👆 請依序：長按照片上的文字 → 拷貝 → 按該張下方的「貼上」。');
   }
 });
@@ -449,7 +783,7 @@ function order(){
   if(S.done)return quiz();
   const q=S.qs[S.i],ck=S.pick,all=S.bt.length===S.tl.length;
   return `${back('sec','回到單元')}<div class="prog"><span>第 ${S.i+1} / ${S.qs.length} 題</span><span>答對 ${S.sc}</span></div>
-  <section class="q"><button class="say" data-a="dplay" aria-label="播放">🔊</button><p>點單字，排成正確的句子<span class="z">${q[1]||''}</span></p></section>
+  ${tagHtml(q[2])}<section class="q"><button class="say" data-a="dplay" aria-label="播放">🔊</button><p>${sk(SEC[S.s])==='en'?'點單字，排成正確的句子':'點詞語，排成正確的句子或順序'}<span class="z">${q[1]||''}</span></p></section>
   <div class="chips" style="border-bottom:3px dashed var(--line)">${S.bt.map((k,j)=>`<button class="opt" data-a="tb" data-j="${j}" ${ck?'disabled':''}>${S.tl[k]}</button>`).join('')}</div>
   <div class="chips">${S.tl.map((w,k)=>S.bt.includes(k)?'':`<button class="opt" data-a="tp" data-k="${k}" ${ck?'disabled':''}>${w}</button>`).join('')}</div>
   ${ck?fbk():(all?`<button class="go" data-a="dchk">檢查</button>`:'')}`;
@@ -460,13 +794,21 @@ function cmpAns(v,a){
   if(!isNaN(x)&&!isNaN(y))return Math.abs(x-y)<1e-6;
   const nm=z=>String(z).replace(/[\s,，]/g,'').toLowerCase();return nm(v)===nm(a);
 }
+function teachV(){
+  const q=S.qs[S.i],st=S.ts[S.ti],n=S.ts.length;
+  return `${back('tclose','回到題目')}<p class="sub" style="margin:0 0 6px">${q[0]}</p><div class="prog"><span>🧑‍🏫 教我怎麼算</span><span>第 ${S.ti+1} / ${n} 步</span></div>
+  <section class="q"><button class="say" data-a="tsay" aria-label="播放">🔊</button><p><b>${st.title}</b><span class="z" style="font-size:1.1rem;color:var(--ink)">${st.text}</span></p></section>
+  ${st.vis?`<div class="dg">${st.vis}</div>`:''}${st.big?`<div class="bigeq">${st.big.replace(/\n/g,'<br>')}</div>`:''}${st.vf||''}
+  <div class="nav"><button class="go alt" data-a="tprev" ${S.ti===0?'disabled style="opacity:.4"':''}>上一步</button><span class="cnt">${S.ti+1}/${n}</span><button class="go" data-a="tnext">${S.ti===n-1?'我懂了，去作答':'下一步'}</button></div>`;
+}
 function calcV(){
   if(S.done)return quiz();
+  if(S.teach)return teachV();
   const q=S.qs[S.i],ck=S.pick;
   return `${back('sec','回到單元')}<div class="prog"><span>第 ${S.i+1} / ${S.qs.length} 題</span><span>答對 ${S.sc}</span></div>
-  <section class="q"><button class="say" data-a="dplay" aria-label="播放">🔊</button><p>${q[0]}</p></section>
+  ${tagHtml(q[4])}<section class="q"><button class="say" data-a="dplay" aria-label="播放">🔊</button><p>${q[0]}</p></section>
   <input id="dv" class="ti" inputmode="decimal" autocomplete="off" autocorrect="off" spellcheck="false" ${ck?'disabled':''} value="${S.val.replace(/"/g,'')}" placeholder="輸入答案（數字）">
-  ${!ck&&q[2]?`<button class="go alt" style="margin:12px 0 0" data-a="hint">💡 看提示</button>${S.hint?`<p class="fb">${q[2]}</p>`:''}`:''}
+  ${(TCH.parse(q)||(q[3]||[]).length)?`<button class="go" style="margin:12px 0 0;background:#ff9800;color:#1b2a5c" data-a="teach">🧑‍🏫 ${ck?'再看一次怎麼算':'不會？教我怎麼算'}</button>`:''}${!ck&&q[2]?`<button class="go alt" style="margin:12px 0 0" data-a="hint">💡 看提示</button>${S.hint?`<p class="fb">${q[2]}</p>`:''}`:''}
   ${ck?`<p class="fb ${S.ok?'good':'oops'}">${S.ok?'🎉 答對了！':'再想想！正確答案：'+q[1]}</p><ol>${q[3].map(z=>`<li>${z}</li>`).join('')}</ol><button class="go" data-a="dnext">${S.i===S.qs.length-1?'看結果':'下一題'}</button>`:`<button class="go" data-a="dchk">檢查</button>`}`;
 }
 function matchV(){
@@ -486,17 +828,87 @@ function mpTap(side,i){
   if(m.done.length===n){S.sc=n-Math.min(m.wrong,n);S.done=true;const st=calc(S.sc,n),key=S.s+'match';if(st>(P[key]||0)){P[key]=st;save()}}
   render();
 }
+
+const TG=v=>/^[ov][123]$/.test(v)?{s:v[0],l:+v[1]}:{s:'o',l:2};
+const tagHtml=v=>/^[ov][123]$/.test(v||'')?`<div class="tags"><span class="tag ${v[0]}">${v[0]==='o'?'📖 課本原題':'🔁 變化題'}</span><span class="tag">${'⭐'.repeat(+v[1])} ${['','基礎','進階','挑戰'][+v[1]]}</span></div>`:'';
+function pick(pool,tagOf,n){
+  let a=pool.slice();
+  if(S.lv){const f=a.filter(x=>TG(tagOf(x)).l===+S.lv);if(f.length>=Math.min(3,a.length))a=f}
+  const o=shuf(a.filter(x=>TG(tagOf(x)).s==='o')),v=shuf(a.filter(x=>TG(tagOf(x)).s==='v'));
+  const no=Math.min(o.length,v.length?Math.ceil(n*.6):n);
+  let r=o.slice(0,no).concat(v.slice(0,n-no));
+  if(r.length<n)r=r.concat(o.slice(no).concat(v.slice(n-no)).slice(0,n-r.length));
+  return shuf(r).sort((x,y)=>TG(tagOf(x)).l-TG(tagOf(y)).l);
+}
+const rnd=(a,b)=>a+Math.floor(Math.random()*(b-a+1));
+const NG=[['彈珠','糖果','橘子','蘋果','芭樂','葡萄','檸檬','水煮蛋'],['貼紙','郵票','卡片','圖畫紙','便條紙'],['故事書','漫畫書','筆記本','字典'],['鉛筆','原子筆','彩色筆','蠟筆'],['學生','小朋友','同學']];
+function swapNoun(x){
+  for(const g of NG){const f=g.slice().sort((p,q)=>q.length-p.length).find(n=>x.includes(n));if(f){const o=g.filter(n=>n!==f);return x.replace(f,o[rnd(0,o.length-1)])}}
+  return x;
+}
+function mulCarry(a,b){const ds=String(a).split('').reverse().map(Number);let c=0,n=0;ds.forEach(d=>{const t=d*b+c;if(t>=10)n++;c=Math.floor(t/10)});return {n,len:ds.length,zeroMid:ds.slice(1,-1).includes(0)||(ds.length>=3&&ds[1]===0)}}
+function lvOK(a,b,l){const m=mulCarry(a,b);if(l===1)return m.n===0;if(l===2)return m.n>=1&&m.n<m.len&&!m.zeroMid;return m.n===m.len||(m.zeroMid&&m.n>=1)}
+function mulLines(a,b){
+  const ds=String(a).split('').reverse().map(Number),PNm=['個位','十位','百位','千位'],out=[a+' × '+b];let c=0;
+  ds.forEach((d,i)=>{const t=d*b+c,last=i===ds.length-1;out.push(PNm[i]+'：'+d+' × '+b+(c?' ＋ 進位 '+c:'')+' ＝ '+t+(last?'，寫 '+t:'，寫 '+t%10+(t>=10?'、進 '+Math.floor(t/10):'')));c=Math.floor(t/10)});
+  out.push('答：'+a*b);return out;
+}
+function numRepl(text,pairs){
+  let s=text;const ph=[];
+  for(const [o,n] of pairs){const re=new RegExp('(?<![0-9])'+o+'(?![0-9])');if(!re.test(s))return null;s=s.replace(re,'\u0001'+ph.length+'\u0002');ph.push(n)}
+  return s.replace(/\u0001(\d+)\u0002/g,(m,i)=>ph[+i]);
+}
+function mkVariant(q,l){
+  if(/365|一年|一週|一星期|一天|小時|分鐘|幾歲|歲/.test(String(q[0])))return null;
+  const m=TCH.parse(q);
+  if(m){
+    const len=String(m.a).length;
+    for(let k=0;k<300;k++){
+      const a=rnd(10**(len-1),10**len-1),b=rnd(2,9);
+      if(a===m.a||b===m.b||a%10===0&&len>1&&l<3||!lvOK(a,b,l))continue;
+      const txt=String(q[0]);let nt;
+      if(/^[\d\s×xX＝=？?]+$/.test(txt))nt=`${a} × ${b} ＝ ？`;
+      else{nt=numRepl(txt,m.a===m.b?[]:[[m.a,a],[m.b,b]]);if(!nt)return null;nt=swapNoun(nt)}
+      return [nt,String(a*b),'幾個幾個合起來，用乘法：'+a+' × '+b+'，從個位開始乘。',mulLines(a,b),'v'+l];
+    }
+    return null;
+  }
+  const e=String(q[0]).match(/^\s*(\d+)\s*([+＋\-－−÷])\s*(\d+)\s*[＝=]\s*[？?]\s*$/);
+  if(e){
+    const op=e[2],len=Math.max(e[1].length,e[3].length);
+    for(let k=0;k<300;k++){
+      let a=rnd(10**(len-1),10**len-1),b=rnd(10**(len-1),10**len-1),ans,txt;
+      if(/[+＋]/.test(op)){const c=String(a).split('').reverse().some((d,i)=>(+d+ +String(b).split('').reverse()[i]||0)>=10);if(l===1&&c||l>=2&&!c)continue;ans=a+b;txt=`${a} ＋ ${b} ＝ ？`}
+      else if(/[\-－−]/.test(op)){if(a<b)[a,b]=[b,a];const br=String(a).split('').reverse().some((d,i)=>+d<(+String(b).split('').reverse()[i]||0));if(l===1&&br||l>=2&&!br||a===b)continue;ans=a-b;txt=`${a} － ${b} ＝ ？`}
+      else{const d=rnd(2,9),k2=rnd(l===1?2:5,l===1?9:Math.max(12,9*len*3));a=d*k2;b=d;ans=k2;txt=`${a} ÷ ${b} ＝ ？`;if(String(a)===e[1])continue}
+      if(txt.replace(/\s/g,'')===String(q[0]).replace(/\s/g,''))continue;
+      return [txt,String(ans),'',[txt.replace('？',ans)],'v'+l];
+    }
+  }
+  return null;
+}
+function genCalc(base,n){
+  const seen=new Set(base.map(x=>String(x[0]))),out=[],ladder=S.lv?[+S.lv]:[1,2,3,2,1,3];
+  const tpl=base.filter(x=>TG(x[4]).s==='o');const T=tpl.length?tpl:base;
+  if(!T.length)return out;
+  for(let i=0,tries=0;out.length<n&&tries<n*12;tries++){
+    const q=T[tries%T.length],v=mkVariant(q,ladder[i%ladder.length]);
+    if(v&&!seen.has(v[0])){seen.add(v[0]);out.push(v);i++}
+  }
+  return out;
+}
 function startPr(m){
-  const s=SEC[S.s];
+  const s=SEC[S.s];S.teach=0;
   if(m==='match'){const n=s.mt.length;S.mt={L:shuf([...Array(n).keys()]),R:shuf([...Array(n).keys()]),sel:null,done:[],wrong:0,msg:''};S.qs=Array(n).fill(0);S.v='match';S.mode='match';S.i=0;S.sc=0;S.pick=null;S.done=false;render();return}
-  const src=m==='dict'?s.w.filter(x=>x[2]==='🔤'):m==='calc'?s.calc:s.w.filter(okS);
-  S.qs=m==='calc'?src.slice(0,12):shuf(src).slice(0,8);S.v=m;S.mode=m;S.i=0;S.sc=0;S.pick=null;S.done=false;S.val='';S.hint=false;
+  const src=m==='dict'?s.w.filter(x=>x[2]==='🔤'):m==='calc'?s.calc:(m==='order'&&s.so&&s.so.length?s.so:s.w.filter(okS));
+  S.qs=m==='calc'?pick(src.concat(genCalc(src,S.nq)),x=>x[4],S.nq):m==='order'?pick(src,x=>x[2],S.nq):shuf(src).slice(0,8);S.v=m;S.mode=m;S.i=0;S.sc=0;S.pick=null;S.done=false;S.val='';S.hint=false;
   if(m==='order')mkTiles();render();say(S.qs[0][0]);
 }
 app.addEventListener('input',e=>{if(e.target.id==='dv')S.val=e.target.value});
 setInterval(()=>{if(document.visibilityState==='visible'){const k=day();T[k]=(T[k]||0)+10;try{localStorage.setItem('english-park-time',JSON.stringify(T))}catch(e){}}},10000);
 function voiceBox(){const vs=voices();return `<details class="how" style="margin-bottom:12px"><summary>🎙️ 聲音設定（換一個更自然的聲音）</summary><p>建議選 Samantha、Ava、Aria 或 Google US English 這類美式女聲。</p><select id="vs"><option value="">自動（推薦）</option>${vs.map(v=>`<option value="${v.name}" ${v.name===VP?'selected':''}>${v.name}（${v.lang}）</option>`).join('')}</select><button class="go" style="margin-top:12px" data-a="vtest">🔊 試聽</button>${vs.length?'':'<p>目前找不到英文語音，請到手機或 iPad 的「設定」下載英文語音。</p>'}</details>`}
-let S={v:'home',s:0,i:0,flip:false,qs:[],sc:0,pick:null,done:false,mode:'',dj:null};
+let NQ=10,LV='';try{NQ=+(localStorage.getItem('english-park-nq')||10);LV=localStorage.getItem('english-park-lv')||''}catch(e){}
+let S={nq:NQ,lv:LV,mn:10,ml:'',v:'home',s:0,i:0,flip:false,qs:[],sc:0,pick:null,done:false,mode:'',dj:null};
 const back=(a,t)=>`<button class="back" data-a="${a}">← ${t}</button>`;
 
 function home(){
@@ -504,21 +916,32 @@ function home(){
   return `<header class="top"><h1 class="tiles">${[...'作業小幫手'].map((c,i)=>`<span style="--r:${[-4,3,-2,4,-3,2][i]}deg">${c}</span>`).join('')}</h1>
   <p class="sub" style="margin-top:14px">國小三年級　英文・國語・數學・自然・社會</p><p class="tot">⭐ ${tot} / ${max}</p>${timeBar()}</header>
   ${diary()}
-  ${voiceBox()}${parentBox()}<p class="sub" style="text-align:center;margin-top:18px">版本 v10（10/16）</p>
+  ${voiceBox()}${parentBox()}<p class="sub" style="text-align:center;margin-top:18px">版本 v15（10/17）</p>
   <details class="how"><summary>📲 加入主畫面，當成 App 使用</summary><ol>
   <li>iPhone／iPad：用 Safari 開啟，點「分享」鈕，選「加入主畫面」。</li>
   <li>Android：用 Chrome 開啟，點右上角「⋮」，選「加入主畫面」或「安裝應用程式」。</li>
   <li>之後點主畫面的圖示，就能像 App 一樣全螢幕使用。</li></ol></details>`;
 }
+function moreBox(){
+  return `<button class="go" style="margin-top:22px;background:#ff9800;color:#1b2a5c" data-a="more">✨ 再出題目（換名詞、換數量、加難度）</button>
+  ${S.more?`<div class="set" style="margin-top:12px"><p>想再出幾題？</p><div class="chips2">${[5,10,20].map(n=>`<button class="chip ${S.mn===n?'on':''}" data-a="mn" data-v="${n}">${n} 題</button>`).join('')}</div>
+  <p>難度</p><div class="chips2">${[['','由易到難'],['1','基礎'],['2','進階'],['3','挑戰']].map(x=>`<button class="chip ${(S.ml||'')===x[0]?'on':''}" data-a="ml" data-v="${x[0]}">${x[1]}</button>`).join('')}</div>
+  <p>想加強什麼？（可空白）</p><input id="mf" class="ti" style="font-size:1rem;text-align:left" placeholder="例如：多出一些應用題、進位容易錯" value="${(S.mf||'').replace(/"/g,'')}">
+  <button class="go" data-a="mgo" style="margin-top:12px">開始出題</button></div>`:''}
+  <p id="os" class="sub" style="margin:12px 0 0"></p>`;
+}
 function sec(){
   const s=SEC[S.s];
   const st=m=>SM.includes(m)?bar(star(S.s,m)):(P[S.s+m]?'✅':'');
-  return `${back('home','回到課程目錄')}<h2>${s.ic} ${s.t}<em>${s.en}</em></h2><p class="sub" style="margin-top:-8px">${s.custom?'作業日期 '+(s.date||''):'課本 '+s.pg}</p><div class="modes">
-  ${s.m.map(m=>`<button class="btn" data-a="mode" data-m="${m}"><span class="ic">${lab(m,s)[0]}</span><span><b>${lab(m,s)[1]}</b><span class="d">${lab(m,s)[2]}</span></span><span class="st">${st(m)}</span></button>`).join('')}</div>${s.custom?'<button class="go alt" style="margin-top:22px" data-a="del">🗑️ 刪除這份作業</button>':''}`;
+  return `${back('home','回到課程目錄')}<h2>${s.ic} ${s.t}<em>${s.en}</em></h2><p class="sub" style="margin-top:-8px">${s.custom?'作業日期 '+(s.date||''):'課本 '+s.pg}</p>
+  <div class="set"><p>每次練習幾題？</p><div class="chips2">${[5,10,15,20].map(n=>`<button class="chip ${S.nq===n?'on':''}" data-a="nq" data-v="${n}">${n} 題</button>`).join('')}</div>
+  <p>難度</p><div class="chips2">${[['','由易到難'],['1','基礎'],['2','進階'],['3','挑戰']].map(x=>`<button class="chip ${(S.lv||'')===x[0]?'on':''}" data-a="lv" data-v="${x[0]}">${x[1]}</button>`).join('')}</div></div>
+  <div class="modes">
+  ${s.m.map(m=>`<button class="btn" data-a="mode" data-m="${m}"><span class="ic">${lab(m,s)[0]}</span><span><b>${lab(m,s)[1]}</b><span class="d">${lab(m,s)[2]}</span></span><span class="st">${st(m)}</span></button>`).join('')}</div>${s.custom?moreBox():''}${s.custom?'<button class="go alt" style="margin-top:22px" data-a="del">🗑️ 刪除這份作業</button>':''}`;
 }
 function cards(){
   const s=SEC[S.s],w=s.w[S.i],last=S.i===s.w.length-1;
-  return `${back('sec','回到單元')}<button class="fc" data-a="flip" aria-label="翻面">${S.flip?`<span class="zh ${w[1].length>8?'s':''}">${w[1]||'（沒有中文）'}</span><span class="hint">再點一下，看圖片</span>`:`<span class="big">${w[2]}</span><span class="w en ${w[0].length>14?'s':''}">${w[0]}</span><span class="hint">點卡片看中文</span>`}</button>
+  return `${back('sec','回到單元')}<button class="fc" data-a="flip" aria-label="翻面">${S.flip?`<span class="zh ${w[1].length>8?'s':''}">${w[1]||'（沒有中文）'}</span><span class="hint">再點一下，看圖片</span>`:`${w[3]&&DIA[w[3]]?`<span class="dg">${DIA[w[3]]()}</span>`:`<span class="big">${w[2]}</span>`}<span class="w en ${w[0].length>14?'s':''}">${w[0]}</span><span class="hint">點卡片看中文</span>`}</button>
   <div class="nav"><button class="say" data-a="word" aria-label="播放發音">🔊</button>
   <button class="go alt" data-a="prev" ${S.i===0?'disabled style="opacity:.4"':''}>上一張</button>
   <span class="cnt">${S.i+1} / ${s.w.length}</span>
@@ -527,7 +950,8 @@ function cards(){
 function info(){
   const f=SEC[S.s].info;
   return `${back('sec','回到單元')}<h2>📖 ${f.h}</h2><p>點一下 🔊，跟著唸一唸。</p>
-  ${f.r.map((r,i)=>`<div class="say-l"><button class="say" data-a="irow" data-i="${i}" aria-label="播放">🔊</button><div class="bub"><span class="e">${r[0]}</span><span class="z">${r[1]}</span></div></div>`).join('')}`;
+  ${f.r.map((r,i)=>`<div class="say-l"><button class="say" data-a="irow" data-i="${i}" aria-label="播放">🔊</button><div class="bub"><span class="e">${r[0]}</span><span class="z">${r[1]}</span></div></div>`).join('')}
+  ${(f.img||[]).filter(k=>DIA[k]).map(k=>`<div class="dg">${DIA[k]()}</div>`).join('')}`;
 }
 function dream(){
   const j=SEC[1].w.slice(0,12),c=S.dj!==null?j[S.dj]:null;
@@ -545,9 +969,9 @@ function quiz(){
   }
   const p=S.pick,right=p!==null&&q.o[p].ok,last=S.i===S.qs.length-1;
   return `${back('sec','回到單元')}<div class="prog"><span>第 ${S.i+1} / ${S.qs.length} 題</span><span>答對 ${S.sc}</span></div>
-  <section class="q"><button class="say" data-a="play" aria-label="播放">🔊</button><p>${q.p}</p></section>
+  ${tagHtml(q.tag)}<section class="q"><button class="say" data-a="play" aria-label="播放">🔊</button><p>${q.p}</p></section>
   <div class="opts ${q.big?'big':''}">${q.o.map((o,k)=>`<button class="opt ${p!==null?(o.ok?'ok':(p===k?'bad':'')):''}" data-a="pick" data-k="${k}" ${p!==null?'disabled':''}>${o.l}</button>`).join('')}</div>
-  ${p!==null?`<p class="fb ${right?'good':'oops'}">${right?'🎉 答對了！':'再接再厲！正確答案：'} ${q.fb}</p><button class="go" data-a="nxt">${last?'看結果':'下一題'}</button>`:''}`;
+  ${p!==null?`<p class="fb ${right?'good':'oops'}">${right?'🎉 答對了！':'再接再厲！正確答案：'} ${q.fb}</p>${q.img&&DIA[q.img]?`<div class="dg">${DIA[q.img]()}</div>`:''}<button class="go" data-a="nxt">${last?'看結果':'下一題'}</button>`:''}`;
 }
 function render(){app.innerHTML={home,sec,cards,info,dream,quiz,add,parent:parentV,dict,order,calc:calcV,match:matchV}[S.v]()+spdBtn();if(S._v!==S.v){window.scrollTo(0,0);S._v=S.v}}
 function startQuiz(m){
@@ -555,10 +979,10 @@ function startQuiz(m){
   const s=SEC[S.s];
   if(m==='listen'){
     S.qs=shuf(s.w).slice(0,6).map(w=>({play:w[0],p:'聽聽看，哪一個是這個說法？',big:1,fb:`${w[0]} ＝ ${w[1]}`,o:shuf([w,...shuf(s.w.filter(x=>x!==w)).slice(0,3)]).map(x=>({l:x[2],ok:x===w}))}));
-  }else if(m==='tf'){S.qs=shuf(s.tf).slice(0,8).map(x=>({play:x[0],p:x[0],fb:(x[1]?'正確。':'錯誤。')+x[2],o:[{l:'⭕ 對',ok:!!x[1]},{l:'❌ 錯',ok:!x[1]}]}))}else if(m==='blend'){
+  }else if(m==='tf'){S.qs=pick(s.tf,x=>x[4],S.nq).map(x=>({tag:x[4],play:x[0],p:x[0],fb:(x[1]?'正確。':'錯誤。')+x[2],img:x[3],o:[{l:'⭕ 對',ok:!!x[1]},{l:'❌ 錯',ok:!x[1]}]}))}else if(m==='blend'){
     S.qs=shuf(s.w).slice(0,6).map(w=>({play:w[0],p:'聽聽看，這個字用哪一個字母組合開頭？',big:1,fb:`${w[0]} ＝ ${w[1]}`,o:shuf(['sm','sn','sw','sl']).map(x=>({l:x,ok:w[0].startsWith(x)}))}));
   }else{
-    S.qs=shuf(s.d).map(d=>({play:d[0],p:`${d[0]}<span class="z">${d[1]}</span>`,fb:`${d[2]}（${d[3]}）`,ans:d[2],o:shuf([d[2],...d[4]]).map(x=>({l:x,ok:x===d[2]}))}));
+    S.qs=pick(s.d,x=>x[6],S.nq).map(d=>({tag:d[6],play:d[0],p:`${d[0]}<span class="z">${d[1]}</span>`,fb:`${d[2]}（${d[3]}）`,img:d[5],ans:d[2],o:shuf([d[2],...d[4]]).map(x=>({l:x,ok:x===d[2]}))}));
   }
   S.v='quiz';S.mode=m;S.i=0;S.sc=0;S.pick=null;S.done=false;render();say(S.qs[0].play);
 }
@@ -568,8 +992,21 @@ app.addEventListener('click',e=>{
   if(a==='vtest'){say("Hello! Nice to meet you. Let's learn English together!");return}
   else if(a==='home'){S.v='home'}
   else if(a==='add'){PF=[];S.v='add'}
+  else if(a==='nq'){S.nq=+b.dataset.v;try{localStorage.setItem('english-park-nq',S.nq)}catch(x){}}
+  else if(a==='lv'){S.lv=b.dataset.v;try{localStorage.setItem('english-park-lv',S.lv)}catch(x){}}
+  else if(a==='more'){S.more=!S.more}
+  else if(a==='mn'){S.mf=(document.getElementById('mf')||{value:S.mf||''}).value;S.mn=+b.dataset.v}
+  else if(a==='ml'){S.mf=(document.getElementById('mf')||{value:S.mf||''}).value;S.ml=b.dataset.v}
+  else if(a==='mgo'){aiMore();return}
+  else if(a==='amat'){S.amat=b.dataset.f;document.querySelectorAll('#mc .chip').forEach(c=>c.classList.toggle('on',c.dataset.f===S.amat));return}
+  else if(a==='asub'){S.asub=b.dataset.f;document.querySelectorAll('#sc .chip').forEach(c=>c.classList.toggle('on',c.dataset.f===S.asub));return}
   else if(a==='flt'){S.f=b.dataset.f}
   else if(a==='hint'){S.hint=!S.hint}
+  else if(a==='teach'){const q=S.qs[S.i];S.ts=TCH.steps(q)||(q[3]||[]).map((x,i)=>({title:'第 '+(i+1)+' 步',text:x,vis:'',vf:''}));S.ti=0;S.teach=1;render();window.scrollTo(0,0);say(S.ts[0].text);return}
+  else if(a==='tnext'){if(S.ti<S.ts.length-1){S.ti++;render();window.scrollTo(0,0);say(S.ts[S.ti].text);return}S.teach=0;window.scrollTo(0,0)}
+  else if(a==='tprev'){if(S.ti>0){S.ti--;render();window.scrollTo(0,0);say(S.ts[S.ti].text)}return}
+  else if(a==='tclose'){S.teach=0}
+  else if(a==='tsay'){say(S.ts[S.ti].text);return}
   else if(a==='mp'){mpTap(b.dataset.s,+b.dataset.i);return}
   else if(a==='ai'){aiRun();return}
   else if(a==='aitest'){const k=document.getElementById('aiu').value.trim(),o=document.getElementById('aits');if(!k||/^https?:/i.test(k)||/^sk-ant-/.test(k)){o.textContent='這個測試只適用於 Google 金鑰，請先貼上金鑰。';return}aiTest(k,o);return}
@@ -594,7 +1031,7 @@ app.addEventListener('click',e=>{
     S.ok=S.v==='dict'?nz(S.val)===nz(S.qs[S.i][0]):S.v==='calc'?cmpAns(S.val,S.qs[S.i][1]):S.bt.map(k=>S.tl[k]).join(' ')===S.qs[S.i][0].trim().split(/\s+/).join(' ');
     S.pick=true;if(S.ok)S.sc++;render();say(S.qs[S.i][0]);return}
   else if(a==='dnext'){
-    if(S.i<S.qs.length-1){S.i++;S.pick=null;S.val='';S.hint=false;if(S.v==='order')mkTiles();render();say(S.qs[S.i][0]);return}
+    if(S.i<S.qs.length-1){S.i++;S.pick=null;S.val='';S.hint=false;S.teach=0;if(S.v==='order')mkTiles();render();say(S.qs[S.i][0]);return}
     S.done=true;const st=calc(S.sc,S.qs.length),key=S.s+S.mode;if(st>(P[key]||0)){P[key]=st;save()}}
   else if(a==='sec'){if(b.dataset.i!==undefined)S.s=+b.dataset.i;S.v='sec'}
   else if(a==='mode'){
