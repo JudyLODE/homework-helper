@@ -624,7 +624,7 @@ const arr=x=>Array.isArray(x)?x:[];
 const DIAKW={'葉序':'leafOrder','節':'node','互生':'alt','對生':'opp','輪生':'who','草本莖':'herb','木本莖':'tree','藤本莖':'vine','軸根':'taproot','鬚根':'fibrous','花萼':'flower','花瓣':'flower','雄蕊':'flower','雌蕊':'flower','花的構造':'flower','果實':'watermelon','種子':'seedGrow','葉緣':'leafEdge','葉緣平滑':'leafEdge','葉緣鋸齒':'leafEdge'};
 const uniq=(a,k)=>{const s=new Set();return a.filter(x=>{const z=String(k(x)).replace(/\s+/g,'').toLowerCase();if(!z||s.has(z))return false;s.add(z);return true})};
 function modes(s){
-  const m=[];if(s.info&&s.info.r.length)m.push('info');if(s.w.length)m.push('cards');if(s.w.length>=4&&s.sub==='en')m.push('listen');if(s.d.length)m.push('talk');if(s.tf.length)m.push('tf');if(s.calc.length)m.push('calc');if(s.so&&s.so.length)m.push('order');if(s.mt.length>=3)m.push('match');if(s.parent.length)m.push('parent');
+  ['w','d','tf','calc','mt','so','parent'].forEach(k=>{s[k]=s[k]||[]});const m=[];if(s.info&&s.info.r.length)m.push('info');if(s.w.length)m.push('cards');if(s.w.length>=4&&s.sub==='en')m.push('listen');if(s.d.length)m.push('talk');if(s.tf.length)m.push('tf');if(s.calc.length)m.push('calc');if(s.so&&s.so.length)m.push('order');if(s.mt.length>=3)m.push('match');if(s.parent.length)m.push('parent');
   return m;
 }
 function clean(s){
@@ -635,6 +635,7 @@ function clean(s){
   s.m=modes(s);return s;
 }
 function mergeL(a,b){
+  ['w','d','tf','calc','mt','so','parent'].forEach(k=>{a[k]=a[k]||[];b[k]=b[k]||[]});
   a.w=a.w.concat(b.w);a.d=a.d.concat(b.d);a.tf=a.tf.concat(b.tf);a.calc=a.calc.concat(b.calc);a.mt=a.mt.concat(b.mt);a.parent=a.parent.concat(b.parent);a.so=(a.so||[]).concat(b.so||[]);
   if(b.info){if(a.info){a.info.r=a.info.r.concat(b.info.r);a.info.img=(a.info.img||[]).concat(b.info.img||[])}else a.info=b.info}
   if(!a.pg&&b.pg)a.pg=b.pg;
@@ -741,7 +742,7 @@ const aiErr=e=>(e==='net'||/Failed to fetch|Load failed|NetworkError/i.test(Stri
 const LVN=['','基礎','進階','挑戰'];
 async function aiMore(){
   let idx=S.s,s=SEC[idx];if(!s)return;
-  if(!s.custom){const c=JSON.parse(JSON.stringify(s));c.custom=1;c.date=iso();c.sub=sk(s);c.lang=c.sub==='en'?'en':'zh';c.m=modes(c);SEC.push(c);LS.push(c);idx=SEC.length-1;S.s=idx;s=c}
+  if(!s.custom){const c=JSON.parse(JSON.stringify(s));c.custom=1;c.t=s.t+'（我的練習）';c.date=iso();c.sub=sk(s);c.lang=c.sub==='en'?'en':'zh';['w','d','tf','calc','mt','so','parent'].forEach(k=>{c[k]=c[k]||[]});c.m=modes(c);SEC.push(c);LS.push(c);idx=SEC.length-1;S.s=idx;s=c;S.copied=1}
   if(!AI.url&&!SMP){setOs('fb oops','還沒設定 AI 服務，請到首頁「家長專區」填寫。');return}
   S.mf=(document.getElementById('mf')||{value:S.mf||''}).value;
   const n=S.mn||10,lv=S.ml||'';
@@ -756,16 +757,20 @@ ${S.mf&&S.mf.trim()?'- 家長特別想加強：'+S.mf.trim().slice(0,80)+'\n':''
 單元內容：
 ${JSON.stringify(ctx)}`;
   try{
-    setOs('sub','⏳ AI 正在出 '+n+' 題新題目，請稍等 20～60 秒…');
+    setOs('sub','⏳ AI 正在出 '+n+' 題新題目，請稍等 20～60 秒…');const oe=document.getElementById('os');if(oe)oe.scrollIntoView({block:'center'});
     const ctl=new AbortController(),tm=setTimeout(()=>ctl.abort(),240000);
     const raw=await aiCall(prompt,[],ctl,tm);
     const list=arr(raw).map(x=>norm(Object.assign({},x,{sub:sk(s),t:x&&x.t||s.t}))).filter(Boolean);
     if(!list.length)throw 'empty';
     const cnt=o=>o.d.length+o.tf.length+o.calc.length+o.so.length+o.mt.length;
-    const before=cnt(s);
+    const before=cnt(s),b2=[s.d.length,s.tf.length,s.calc.length,s.so.length,s.mt.length];
     list.forEach(x=>mergeL(s,x));
-    saveLS();S.more=0;render();
-    setOs('good','✅ 新增了 '+(cnt(s)-before)+' 題（重複的已自動略過）。回到下面的練習，就會出現新題目。');
+    saveLS();S.more=0;
+    const add=cnt(s)-before,a2=[s.d.length,s.tf.length,s.calc.length,s.so.length,s.mt.length];
+    const nm=['選擇題','是非題','計算題','排序題','配對'];
+    const det=a2.map((v,i)=>v>b2[i]?nm[i]+' +'+(v-b2[i]):'').filter(Boolean).join('、');
+    S.note=add>0?`✅ AI 新增了 ${add} 題（${det}）${S.copied?'。這是複製出來的「我的練習」，原本的範例沒有改動；它也會出現在首頁的「今天的作業」':''}。往下按「選擇題練習」「是非題」等，就會出現新題目。`:'ℹ️ AI 出的題目和現有題目重複，沒有新增。可以換一下難度，或在「想加強什麼」寫不同的重點，再按一次。';
+    S.copied=0;render();window.scrollTo(0,0);
   }catch(e){setOs('fb oops',aiErr(e))}
 }
 async function aiRun(){
@@ -812,6 +817,7 @@ async function aiTest(k,out){
     out.textContent='❌ 金鑰有效，但試了 '+Math.min(5,names.length)+' 個模型都失敗。最後一個：'+lastm;
   }catch(e){out.textContent='❌ 無法連線：'+(e&&e.message?e.message:e)}
 }
+window.addEventListener('unhandledrejection',e=>{try{setOs('fb oops','發生了錯誤：'+((e.reason&&e.reason.message)||e.reason)+'。請把這行字拍給我。')}catch(x){}});
 let PF=[];
 app.addEventListener('change',e=>{
   if(e.target.id==='ph'&&e.target.files.length){
@@ -993,13 +999,14 @@ function home(){
   return `<header class="top"><h1 class="tiles">${[...'作業小幫手'].map((c,i)=>`<span style="--r:${[-4,3,-2,4,-3,2][i]}deg">${c}</span>`).join('')}</h1>
   <p class="sub" style="margin-top:14px">國小三年級　英文・國語・數學・自然・社會</p><p class="tot">⭐ ${tot} / ${max}</p>${timeBar()}</header>
   ${diary()}
-  ${voiceBox()}${parentBox()}<p class="sub" style="text-align:center;margin-top:18px">版本 v16（10/17）</p>
+  ${voiceBox()}${parentBox()}<p class="sub" style="text-align:center;margin-top:18px">版本 v17（10/17）</p>
   <details class="how"><summary>📲 加入主畫面，當成 App 使用</summary><ol>
   <li>iPhone／iPad：用 Safari 開啟，點「分享」鈕，選「加入主畫面」。</li>
   <li>Android：用 Chrome 開啟，點右上角「⋮」，選「加入主畫面」或「安裝應用程式」。</li>
   <li>之後點主畫面的圖示，就能像 App 一樣全螢幕使用。</li></ol></details>`;
 }
 function poolNote(s){
+  s={d:s.d||[],tf:s.tf||[],so:s.so||[],mt:s.mt||[],calc:s.calc||[]};
   const cnt=(a,i)=>{const r={1:0,2:0,3:0};a.forEach(x=>{r[TG(x[i]).l]++});return r};
   const part=[];
   if(s.d.length){const c=cnt(s.d,6);part.push(`選擇題 ${s.d.length}（基礎 ${c[1]}・進階 ${c[2]}・挑戰 ${c[3]}）`)}
@@ -1022,7 +1029,7 @@ function moreBox(){
 function sec(){
   const s=SEC[S.s];
   const st=m=>SM.includes(m)?bar(star(S.s,m)):(P[S.s+m]?'✅':'');
-  return `${back('home','回到課程目錄')}<h2>${s.ic} ${s.t}<em>${s.en}</em></h2><p class="sub" style="margin-top:-8px">${s.custom?'作業日期 '+(s.date||''):'課本 '+s.pg}</p>
+  return `${back('home','回到課程目錄')}<h2>${s.ic} ${s.t}<em>${s.en}</em></h2><p class="sub" style="margin-top:-8px">${s.custom?'作業日期 '+(s.date||''):'課本 '+s.pg}</p>${S.note?`<p class="fb good" style="margin:0 0 12px;padding:10px 14px;border:3px solid var(--line);border-radius:14px;background:var(--ok)">${S.note}</p>`:''}
   <div class="set"><p>每次練習幾題？</p><div class="chips2">${[5,10,15,20].map(n=>`<button class="chip ${S.nq===n?'on':''}" data-a="nq" data-v="${n}">${n} 題</button>`).join('')}</div>
   <p>難度</p><div class="chips2">${[['','由易到難'],['1','基礎'],['2','進階'],['3','挑戰']].map(x=>`<button class="chip ${(S.lv||'')===x[0]?'on':''}" data-a="lv" data-v="${x[0]}">${x[1]}</button>`).join('')}</div>${poolNote(s)}</div>
   <div class="modes">
@@ -1079,7 +1086,7 @@ app.addEventListener('click',e=>{
   const b=e.target.closest('[data-a]');if(!b||b.disabled)return;
   const a=b.dataset.a,s=SEC[S.s];
   if(a==='vtest'){say("Hello! Nice to meet you. Let's learn English together!");return}
-  else if(a==='home'){S.v='home'}
+  else if(a==='home'){S.v='home';S.note=''}
   else if(a==='add'){PF=[];S.v='add'}
   else if(a==='nq'){S.nq=+b.dataset.v;try{localStorage.setItem('english-park-nq',S.nq)}catch(x){}}
   else if(a==='lv'){S.lv=b.dataset.v;try{localStorage.setItem('english-park-lv',S.lv)}catch(x){}}
@@ -1122,7 +1129,7 @@ app.addEventListener('click',e=>{
   else if(a==='dnext'){
     if(S.i<S.qs.length-1){S.i++;S.pick=null;S.val='';S.hint=false;S.teach=0;if(S.v==='order')mkTiles();render();say(S.qs[S.i][0]);return}
     S.done=true;const st=calc(S.sc,S.qs.length),key=S.s+S.mode;if(st>(P[key]||0)){P[key]=st;save()}}
-  else if(a==='sec'){if(b.dataset.i!==undefined)S.s=+b.dataset.i;S.v='sec'}
+  else if(a==='sec'){if(b.dataset.i!==undefined){S.s=+b.dataset.i;S.note=''}S.v='sec'}
   else if(a==='mode'){
     const m=b.dataset.m;S.mode=m;
     if(m==='cards'){S.v='cards';S.i=0;S.flip=false;render();say(s.w[0][0]);return}
