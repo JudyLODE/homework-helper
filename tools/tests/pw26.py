@@ -1,0 +1,16 @@
+from playwright.sync_api import sync_playwright
+with sync_playwright() as p:
+    b=p.chromium.launch();pg=b.new_page(viewport={'width':430,'height':900})
+    errs=[];pg.on('pageerror',lambda e:errs.append(str(e)))
+    pg.goto('file:///mnt/user-data/outputs/study-helper.html');pg.wait_for_timeout(800)
+    pg.evaluate("LS.push({date:iso(),sub:'cn',lang:'zh',custom:1,t:'第一課 亂的',en:'',pg:'',ic:'📖',c:SUB.cn.c,m:['cards'],w:[['字','詞','']],d:[],tf:[],calc:[],so:[],mt:[],parent:[]});SEC.push(LS[LS.length-1]);saveLS()")
+    pg.click('[data-a="flt"][data-f="cn"]')
+    print(pg.evaluate("SEC.filter(s=>s.custom&&!s.del&&sk(s)==='cn').length"))
+    pg.click('[data-a=clrcn]');print('confirm' , '確定要清空' in pg.inner_text('#app'))
+    pg.click('[data-a=clrno]');print('确定' , '確定要清空' in pg.inner_text('#app'))
+    pg.click('[data-a=clrcn]');pg.click('[data-a=clrcn]')
+    tx=pg.inner_text('#app');print(pg.evaluate("SEC.filter(s=>s.custom&&!s.del&&sk(s)==='cn').length"),'亂的' in tx,'第十二課 奇特的朋友' in tx,'繞口令村' in tx.split('課程目錄')[1][:200] if '課程目錄' in tx else '')
+    print([l for l in tx.split('\n') if '課程目錄' in l or '其他' in l])
+    pg.reload();pg.click('[data-a="flt"][data-f="cn"]');tx=pg.inner_text('#app');print('after reload sample hidden:','飛舞的絲帶' not in tx,'亂的' not in tx,'第五課 小丑魚和海葵' in tx)
+    pg.click('[data-a=tup] >> nth=1');print(pg.input_value('#lt'))
+    print(errs)

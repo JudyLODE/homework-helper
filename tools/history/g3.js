@@ -1,0 +1,55 @@
+/* ===== 第4單元（乘法）與綜合評量模板 ===== */
+MXG.wpb=it=>{const k=(it.pa||{}).k||'add';for(let t=0;t<30;t++){const o=wpGen(k);if(o)return {s:`${o.q}\n答：（ ）${o.u}`,a:[String(o.a)]}}return it};
+const FR=['草莓','水梨','蘋果','芒果','葡萄'];
+const near=(x,u)=>Math.round(x/u)*u;
+MXG.est=it=>{const v=+(it.pa||{}).v||1;
+  if(v===1){for(let t=0;t<300;t++){const A=rnd(2,5)*100-rnd(1,9),B=rnd(4,8),P=A*B,ok=Math.random()<.5,M=ok?Math.ceil((P+rnd(100,300))/100)*100:Math.floor((P-rnd(100,300))/100)*100;if(M<500)continue;return {s:`老闆跟農場訂購一箱 ${A} 元的${pick1(FR)}，${M} 元夠不夠買 ${B} 箱回來熬煮果醬？〔夠｜不夠〕`,a:[],c:[ok?0:1]}}}
+  if(v===2||v===3){const st=v===2?20:40,A=v===2?rnd(11,29):rnd(31,48),B=v===2?rnd(4,9):rnd(3,5),P=A*B,c=Math.max(st*2,near(P,st)),o=rnd(0,2),ops=[0,1,2].map(i=>c+(i-o)*st);if(ops[0]<=0||ops.some(x=>Math.abs(x-P)<Math.abs(c-P)&&x!==c))return MXG.est(it);const it2=v===2?pick1(['馬卡龍','小餅乾','泡芙']):pick1(['杏仁瓦片','蛋捲','貓舌餅']),u=v===2?'個':'片';
+    return {s:v===2?`店員把${it2}裝進透明點心盒裡，每盒都裝了 ${A} 個，共裝滿 ${B} 盒，${it2}數量最接近多少個？〔${ops.join(' 個｜')} 個〕`:`剛出爐的${it2}一盤有 ${A} 片，下午一共烤好了 ${B} 盤，數量最接近多少片？〔${ops.join(' 片｜')} 片〕`,a:[],c:[ops.indexOf(c)]}}
+  if(v===4){for(let t=0;t<300;t++){const A=rnd(2,6)*100-rnd(1,9),T=near(A*3+rnd(-250,250),100);if(Math.abs(T-A*3)<100||T<500)continue;return {s:`甜點店推出優惠，限時優惠：原味生乳捲一條 ${A} 元，三條 ${T} 元。估估看，姐姐一次買 3 條，會比較便宜嗎？〔會｜不會〕`,a:[],c:[T<A*3?0:1]}}}
+  if(v===6){const P=rnd(2,9)*10-1,B=rnd(4,8);for(let t=0;t<200;t++){const T=near(P*B,10)+pick1([-1,1])*rnd(2,7)*10;if(Math.abs(T-P*B)<20||T<100)continue;return {s:`大大超市的沐浴乳每瓶 ${P} 元，同樣的沐浴乳 ${B} 瓶，好好超市賣 ${T} 元，哪一家超市賣的比較便宜？〔大大超市｜好好超市〕`,a:[],c:[P*B<T?0:1]}}}
+  if(v===7){const T=rnd(4,9)*100,S=shuf2([['洋芋片','包'],['巧克力脆片','箱'],['檸檬薄片','盒'],['焦糖爆米花','桶'],['海苔餅乾','包'],['小魚乾','袋']]).slice(0,4),L=[];
+    for(let i=0;i<4;i++){const good=i<2,k=rnd(3,8);let p;if(good)p=Math.round(T/k)+rnd(-6,6);else{p=Math.round((Math.random()<.5?T*2.1:T*.4)/k)}const P=p*k;if(good?Math.abs(P-T)>70:Math.abs(P-T)<250)return MXG.est(it);L.push({n:S[i][0],u:S[i][1],p,k,good})}
+    const o=shuf2(L);return {h:`花花買了大約 ${T} 元的餅乾，下面哪些可能是花花買的餅乾？`,s:o.map((x,i)=>`(${i+1}) ${x.n}一${x.u} ${x.p} 元，買 ${x.k} ${x.u}。〔可能｜不可能〕`).join('\n'),a:[],c:o.map(x=>x.good?0:1)}}
+  if(v===8){for(let t=0;t<300;t++){const P=rnd(150,260),a=rnd(18,36),b=rnd(36,60),k1=rnd(5,9),k2=rnd(3,5),ok1=Math.random()<.5,t1=a*k1,t2=b*k2;if(ok1?!(t1>=P+4&&t1<=P+30&&t2<P&&t2>=P-30):!(t2>=P+4&&t2<=P+30&&t1<P&&t1>=P-30))continue;
+    return {s:`社區有 ${P} 人參加健走活動，簽到時發給每人一瓶運動飲料，要購買哪一種組合，才能讓全部的人都至少有一瓶運動飲料？〔每箱 ${a} 瓶的運動飲料 ${k1} 箱｜每箱 ${b} 瓶的運動飲料 ${k2} 箱〕`,a:[],c:[ok1?0:1]}}}
+  if(v===9){const A=pick1([299,198,399,499,299,598]),k=3,M=A*3-rnd(1,3)*100+pick1([0,0,200]);for(let t=0;t<200;t++){const T=near(A*3+rnd(-300,300),100);if(Math.abs(T-A*3)<50||T<300)continue;const e=near(A,10);return {s:`服飾店年末出清，1 件上衣原價 ${A} 元，任選 3 件 ${T} 元，媽媽一次買 3 件會比較便宜嗎？\n估算（價錢估成整十）：（ ）×（ ）＝（ ），一次買 3 件〔會｜不會〕比較便宜。`,a:[String(e),'3',String(e*3)],c:[T<A*3?0:1]}}}
+  return it};
+MXG.estf=it=>{const P=rnd(180,260),k=pick1([2,3]),L=['小火鍋','牛肉麵','炸雞套餐','海鮮燉飯'];for(let t=0;t<300;t++){const p=rnd(150,350)+rnd(1,9),M=near(p*k,100)+pick1([-100,0,100]);if(M<300||Math.abs(M-p*k)<20)continue;const e=near(p,10);if((e*k>M)!==(p*k>M))continue;return {s:`一份${pick1(L)} ${p} 元，姐姐想買 ${k} 份外帶，付 ${M} 元夠嗎？\n估算（價錢估成整十）：（ ）×（ ）＝（ ），${M} 元〔夠｜不夠〕。`,a:[String(e),String(k),String(e*k)],c:[p*k<=M?0:1]}}return it};
+MXG.estb=it=>{const big=Math.random()<.4,a=big?rnd(205,899):rnd(21,89),b=rnd(3,9),u=big?100:10;if(a%u===0)return MXG.estb(it);const c=near(a,u),o=rnd(0,2),ops=[0,1,2].map(i=>c+(i-o)*u);if(ops[0]<=0)return MXG.estb(it);return {s:`${a} × ${b} 的答案最接近哪一個算式？〔${ops.map(x=>x+'×'+b).join('｜')}〕`,a:[],c:[o]}};
+MXG.cmpm=it=>{const k=rnd(4,9),ty=pick1(['near','scale','swap']);let a,b;
+  for(let t=0;t<100;t++){if(ty==='near'){a=rnd(2,9)*100;b=a+pick1([-1,1])*rnd(1,9)}else if(ty==='scale'){a=rnd(2,9)*100;b=a/10}else{a=rnd(201,799);const d=String(a).split('');if(d[1]===d[2])continue;[d[1],d[2]]=[d[2],d[1]];b=+d.join('')}if(a*k<=9999&&b*k<=9999&&a!==b)break}
+  if(!(a*k<=9999&&b*k<=9999))a=200,b=202;if(Math.random()<.5)[a,b]=[b,a];return {s:`${a} × ${k} 〔＜｜＝｜＞〕 ${b} × ${k}`,a:[],c:[a<b?0:a===b?1:2]}};
+MXG.stmt=it=>{const W=shuf2(['小亮','小晴','美美','阿宏','佳琪']).slice(0,3),T=shuf2([['大玩偶','隻'],['遙控車','輛'],['故事書','本'],['積木組','盒'],['球鞋','雙']]).slice(0,3);const L=[],c=[];
+  for(let i=0;i<3;i++){const P=pick1([499,399,320,299,198,250,350]),k=rnd(3,5),can=Math.random()<.5,tr=Math.random()<.6,tot=P*k;let M=near(tot+(tr===can?rnd(0,3)*100+0:-100),100);if(can?(tr!==(M>=tot)):(tr!==(M<tot))){M=can?(tr?near(tot,100)+100:near(tot,100)-200):(tr?near(tot,100)-200:near(tot,100)+100)}
+    if(can?(tr!==(M>=tot)):(tr!==(M<tot)))return MXG.stmt(it);L.push(`${W[i]}：「我帶了 ${M} 元，${T[i][0]}每${T[i][1]} ${P} 元，我帶的錢${can?'可以':'不夠'}買 ${k} ${T[i][1]}。」〔對｜錯〕`);c.push(tr?0:1)}
+  return {h:`${W[0]}和同學共 3 人到玩具店買東西。下面敘述對的選「對」，錯的選「錯」。`,s:L.join('\n'),a:[],c}};
+MXG.bus=it=>{for(let t=0;t<300;t++){const N=rnd(100,220),a=pick1([21,30,35,42,45,50]),b=pick1([21,30,35,42,45,50]);if(a===b)continue;const k1=rnd(3,7),k2=rnd(3,7),t1=a*k1,t2=b*k2,ok1=Math.random()<.5;if(ok1?!(t1>=N&&t1<N+40&&t2<N&&t2>N-40):!(t2>=N&&t2<N+40&&t1<N&&t1>N-40))continue;
+  return {s:`學校舉行自然科學博物館戶外教育活動，當天共有 ${N} 人參加，要選擇哪一種交通工具，才能讓全部的人都有座位？\nA ${a} 人座的巴士 ${k1} 輛\nB ${b} 人座的巴士 ${k2} 輛\n答：〔A｜B〕`,a:[],c:[ok1?0:1]}}return it};
+MXG.say2=it=>{const [n1,n2]=shuf2(['曉萱','弟弟','小安','阿宏','佳琪','承恩']).slice(0,2);for(let t=0;t<400;t++){const A=rnd(10,16)*100,B=rnd(10,16)*100,p=rnd(300,520),q=rnd(600,860),k1=rnd(2,4),k2=rnd(2,3),s1can=Math.random()<.5,w1=Math.random()<.5;
+  const t1=s1can?A>=p*k1:A<p*k1,t2=B>=q*k2;if(t1===t2)continue;if(Math.abs(A-p*k1)<80||Math.abs(B-q*k2)<80)continue;
+  return {s:`${n1}：「${A} 顆巧克力糖分裝成節慶大禮盒，每盒裝 ${p} 顆，${s1can?'可以':'不夠'}裝滿 ${k1} 盒。」\n${n2}：「${B} 顆牛奶糖分裝成巨無霸桶，每桶裝 ${q} 顆，可以裝滿 ${k2} 桶。」\n誰的說法正確？〔${n1}｜${n2}〕`,a:[],c:[t1?0:1]}}return it};
+MXG.lkq=it=>{for(let t=0;t<400;t++){const hs=shuf2([2,3,4,5,6,7,8,9]).slice(0,4),ks=shuf2([2,3,4,5,6,7,8,9]).slice(0,4),pr=hs.map((h,i)=>h*100*ks[i]).slice().sort((x,y)=>x-y);if(pr.some((x,i)=>i&&x-pr[i-1]<500))continue;
+  const rows=hs.map((h,i)=>{const d=pick1([-1,1])*rnd(1,6),ex=Math.random()<.5;return {L:ex?h*100:h*100+d,R:ex?h*100+d:h*100,k:ks[i]}}),ord=shuf2([0,1,2,3]),lab=['A','B','C','D'];
+  return {h:'把答案最接近的算式找出來，在每一題後面選出右邊的代號。',tb:{head:lab,rows:[ord.map(i=>`${rows[i].R}×${rows[i].k}`)]},s:rows.map((r,i)=>`${i+1}. ${r.L}×${r.k}　〔A｜B｜C｜D〕`).join('\n'),a:[],c:rows.map((_,i)=>ord.indexOf(i))}}return it};
+MXG.menu=it=>{for(let t=0;t<400;t++){const nm=shuf2(['串珠手鍊製作','奶油膠手機殼','手作香氛蠟燭','蝶谷巴特零錢包','木工小書架','彩繪帆布袋']).slice(0,4),n=pick1([2,3]),pr=nm.map(()=>rnd(35,95)*10-rnd(0,1)*10+rnd(0,1)*0),V=pick1([1500,1800,2100,2400]);const ok=pr.map(p=>p*n<=V);if(ok.filter(Boolean).length<1||ok.filter(Boolean).length>3||pr.some(p=>Math.abs(p*n-V)<30))continue;
+  return {h:'下面是巧手手作坊的課程價目表。',tb:{head:['課程項目',...nm],rows:[['價格',...pr.map(p=>p+' 元／人')]]},s:`丹丹和朋友共 ${n} 人來做手作，她們共有 ${V} 元的體驗券。如果她們要選擇同一種課程，且用體驗券折抵後不須再付錢，她們可以參加下面哪些課程？\n${nm.map((x,i)=>`${x}〔可以｜不可以〕`).join('\n')}`,a:[],c:ok.map(x=>x?0:1)}}return it};
+MXG.whoc=it=>{for(let t=0;t<300;t++){const a=rnd(120,399),b=rnd(3,9);const P=a*b;if(P>9999||!hasCarry('×',a,b))continue;const w=[P,P+pick1([-100,100,-1000,1000,-10,10]),P+pick1([-100,100,-10,10,-1000,1000])];if(new Set(w).size!==3||w.some(x=>x<=0))continue;const nm=['妮妮','佩佩','小睿'],o=shuf2([0,1,2]);
+  return {h:'下面哪一個學生的算法是對的？',tb:{head:o.map(i=>nm[i]),rows:[o.map(i=>`${a} × ${b} ＝ ${w[i]}`)]},s:`算法正確的是〔${o.map(i=>nm[i]).join('｜')}〕。`,a:[],c:[o.indexOf(0)]}}return it};
+MXG.shop=it=>{for(let t=0;t<600;t++){const nm=shuf2([['行李箱',1800,3200],['平底鍋',900,1500],['刮鬍刀',700,1400],['電鍋',2000,3200],['吹風機',600,1200],['檯燈',800,1600],['棉被',1400,2400]]).slice(0,4).map(x=>[x[0],rnd(x[1],x[2])]),B=rnd(30,45)*100;const pairs=[];for(let i=0;i<4;i++)for(let j=i+1;j<4;j++)if(nm[i][1]+nm[j][1]<=B)pairs.push([i,j]);if(pairs.length!==1)continue;const [i,j]=pairs[0];if(nm.some(x=>Math.abs(x[1]-0)<0))continue;
+  return {h:'媽媽整理要買的東西清單，如下表。',tb:{head:['商品',...nm.map(x=>x[0])],rows:[['價格',...nm.map(x=>x[1]+' 元')]]},s:`媽媽帶了 ${B} 元，她可以先買（ ）和（ ）。`,a:[nm[i][0]+'|'+nm[j][0],nm[i][0]+'|'+nm[j][0]],uq:[[0,1]]}}return it};
+MXG.cafe=it=>{for(let t=0;t<600;t++){const pr=[rnd(250,520),rnd(250,520),rnd(250,520),rnd(250,520)],n=rnd(4,6),M=rnd(16,24)*100,okc=pr.filter(p=>p*n<=M).length;if(okc<1||okc>3||pr.some(p=>Math.abs(p*n-M)<40))continue;const [w,w2]=shuf2(NAMES).slice(0,2),n2=rnd(5,8),X=rnd(0,3),tot=pr[X]*n2,k=Math.ceil(tot/1000);if(k>4)continue;const L='ABCD';
+  return {h:'下表是咖啡廳的套餐價格，想一想，回答問題。',tb:{head:['套餐',...L.split('')],rows:[['價格',...pr.map(p=>p+' 元')]]},s:`1. ${w}全家 ${n} 人一起去喝下午茶，爸爸錢包裡有 ${M} 元，如果全家都點同一種套餐，可以點哪幾種套餐？\n${L.split('').map(x=>`${x} 套餐〔可以｜不可以〕`).join('　')}\n2. ${w2}舉辦生日會，一共有 ${n2} 人參加，每人都點一份 ${L[X]} 套餐。\n(1) ${w2}一共花了（ ）元。\n(2) ${w2}付 ${k} 張 1000 元，可以找回（ ）元。`,a:[String(tot),String(k*1000-tot)],c:pr.map(p=>p*n<=M?0:1)}}return it};
+MXG.cardsum=it=>{for(let t=0;t<300;t++){const ds=shuf2([1,2,3,4,5,6,7,8,9]).slice(0,4),mx=+ds.slice().sort((a,b)=>b-a).join(''),mn=+ds.slice().sort((a,b)=>a-b).join('');if(mx+mn>9999)continue;return {s:`用 ${ds.join('、')} 四張數字卡，排出最大的四位數和最小的四位數，數字不能重複，並記在位值表上。\n最大的四位數：\n⟦位⟧\n最小的四位數：\n⟦位⟧\n最大和最小四位數的和是（ ），差是（ ）。`,pvn:[mx,mn],a:[String(mx+mn),String(mx-mn)]}}return it};
+MXG.rope=it=>{for(let t=0;t<300;t++){const m=rnd(3,6),c=pick1([3,5,8]),d=pick1([30,50,80]);const [x,y]=shuf2(['紅','黃']),red=m*100+c,yel=m*100+d/10,grn=m*100;if(red===yel)continue;
+  const s1=Math.random()<.5,y1=s1?yel:yel+pick1([-5,5,50]),st=[`黃繩長 ${y1} 公分。`,`紅繩最短。`,`黃繩和紅繩一樣長。`,`黃繩比綠繩長 ${(Math.random()<.5?d:d+20)} 毫米。`];
+  const tv=[y1===yel,red<yel&&red<grn,red===yel,(()=>{const q=+st[3].match(/\d+/)[0];return q===d})()];if(tv.filter(Boolean).length<1||tv.filter(Boolean).length>3)continue;
+  return {h:`紅繩長 ${m} 公尺 ${c} 公分，黃繩長 ${m} 公尺又 ${d} 毫米，綠繩長 ${m} 公尺。`,s:st.map((x,i)=>`(${i+1}) ${x}〔對｜錯〕`).join('\n'),a:[],c:tv.map(v=>v?0:1)}}return it};
+/* ruler：支援只填毫米，名稱與長度換題 */
+const rEv0=MATH.ruler.ev;
+MATH.ruler.norm=it=>{const mm=MI(it.mm);return mm>=3&&mm<=125?{name:one(it.name),mm,o:it.o==='mm'?'mm':''}:null};
+MATH.ruler.units=(s,it)=>it.o==='mm'?1:2;
+MATH.ruler.can=it=>true;
+MATH.ruler.gen=it=>({name:it.o==='mm'?pick1(['螞蟻','瓢蟲','毛毛蟲','小蜜蜂','蝸牛殼']):pick1(['橡皮擦','迴紋針','鉛筆','彩色筆','膠帶','電池','吸管','書籤','便條紙']),mm:it.o==='mm'?rnd(6,20):10+Math.floor(Math.random()*105),o:it.o});
+MATH.ruler.ev=(sec,k,it,A)=>{if(it.o==='mm'){const v=digits(A[k+'.0']),ok=v===String(it.mm);return {got:ok?sec.pt:0,max:sec.pt,st:ok?'ok':(v?'bad':'none')}}return rEv0(sec,k,it,A)};
+MATH.ruler.render=(sec,si,it,ii,ck,k,no,r,M,A)=>it.o==='mm'?`${no}${it.name?`<b>${pe(it.name)}</b>的長度：`:''}${rulerSvg(it.mm)}<div class="row">${inp(k+'.0',A[k+'.0'],ck,'c2')} 毫米</div>${M}${ck&&r.st!=='ok'?ansBox('正確答案：<b>'+it.mm+' 毫米</b>'):''}`:`${no}${it.name?`<b>${pe(it.name)}</b>的長度：`:''}${rulerSvg(it.mm)}<div class="row">${inp(k+'.0',A[k+'.0'],ck,'c1')} 公分 ${inp(k+'.1',A[k+'.1'],ck,'c1')} 毫米</div>${M}${ck&&r.st!=='ok'?ansBox('正確答案：<b>'+Math.floor(it.mm/10)+' 公分 '+it.mm%10+' 毫米</b>（'+it.mm+' 毫米）'):''}`;
