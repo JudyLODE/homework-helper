@@ -122,7 +122,7 @@ details.mc>div{padding:0 0 12px}
 
 .sheet{background:#fff;color:#000;margin:10px auto;line-height:1.7;font-size:11pt;width:185mm;max-width:100%;-webkit-print-color-adjust:exact;print-color-adjust:exact}
 .sheet *{color:#000}
-.sheet.cn{width:278mm;max-width:none}
+.sheet.cn{width:278mm;max-width:none;font-size:12pt;line-height:1.7}
 .swr{overflow-x:auto}
 .sheet .rl{width:50%;max-width:180px}
 .sheet.fs2{font-size:10pt;line-height:1.5}
@@ -155,10 +155,14 @@ details.mc>div{padding:0 0 12px}
 .bankbox2{border:1.5px solid #000;padding:2mm 3mm;margin:0 0 2mm;font-size:.95em}
 .qi{break-inside:avoid;margin:0 0 2.2mm}
 .qn{font-weight:700;margin-right:.3em}
-.cnb .qn{text-combine-upright:all} .cnb .why{display:inline;font-size:.8em} .cnb .why:before{content:" "}
+.cnb .qn{text-combine-upright:all} .cnb .why{display:inline;font-size:1em} .cnb .why:before{content:" "}
 .gap{display:inline-block;min-inline-size:2.2em;height:1em}
 .gap.gs0{min-inline-size:1em}
 .gap.gs1{min-inline-size:1.4em}.gap.gs2{min-inline-size:1.8em}.gap.gs3{min-inline-size:2.8em}.gap.gs4{min-inline-size:3.6em}
+.cnb .gap{min-inline-size:3.6em}
+.cnb .gap.gsa{min-inline-size:10.8em}
+.cnb .xsec>h3{font-size:1em}.cnb .xsec>h3 .expt{font-size:1em}
+.cnb .exd2{font-size:1em}.cnb .bankbox2{font-size:1em}
 .blk2{white-space:nowrap;display:inline-block;vertical-align:baseline}
 .veq{font-size:1.05em;white-space:nowrap;display:inline-block;max-width:100%}
 .av{font-weight:700}
@@ -204,8 +208,8 @@ details.mc>div{padding:0 0 12px}
 .expage.first{display:flex;flex-direction:row}
 .expage:last-child{break-after:auto}
 .expage .hd{order:2;writing-mode:vertical-rl;border-left:2px solid #000;padding-left:2mm;margin-left:3mm;text-align:center}
-.expage .hd h1{font-size:13.5pt;margin:0;letter-spacing:.25em;font-weight:700}
-.expage .hd .h2,.expage .hd .h3{font-size:10pt;letter-spacing:.08em}
+.expage .hd h1{font-size:12pt;margin:0;letter-spacing:.25em;font-weight:700}
+.expage .hd .h2,.expage .hd .h3{font-size:12pt;letter-spacing:.08em}
 .expage .hd .h3{font-size:8.5pt;letter-spacing:0}
 .exrow{height:var(--rh);display:flex;flex-direction:row-reverse;align-items:flex-start}
 .exrow>.xsec{writing-mode:vertical-rl;height:var(--rh);flex:none}
@@ -217,6 +221,8 @@ details.mc>div{padding:0 0 12px}
 .sheet:not(.cn) .hd .h3{margin-top:1mm;font-size:11pt}
 .cnb.meas{writing-mode:vertical-rl}
 .cnb.meas>.xsec{height:var(--rh);margin:0}
+.cnb .ops,.cnb .frow,.cnb .why{margin-left:0}
+.cnb .ops .op{flex-shrink:0}
 .exl{justify-content:flex-start!important;text-align:left!important}
 .ptb{float:right}
 .exmini{font-size:.85rem;padding:4px 14px;border:2px solid var(--line);border-radius:10px;background:var(--card);margin-left:6px;font-weight:700}
@@ -1362,7 +1368,7 @@ function home(){
   ${S.note?`<p class="fb good" style="margin:0 0 12px">${S.note}</p>`:''}
   ${diary()}
   <button class="go" style="margin-top:18px" data-a="exam">🧾 考卷出題</button>
-  <button class="go alt" style="margin-top:10px" data-a="settings">⚙️ 功能設定</button><p class="sub" style="text-align:center;margin-top:18px">版本 v69（11/2）</p>`;
+  <button class="go alt" style="margin-top:10px" data-a="settings">⚙️ 功能設定</button><p class="sub" style="text-align:center;margin-top:18px">版本 v71（11/2）</p>`;
 }
 
 function backupBox(){return `<details class="how" style="margin-bottom:12px"><summary>💾 備份與還原我的課程</summary>
@@ -2763,7 +2769,7 @@ function exDigest(idxs){return idxs.map(i=>{const s=SEC[i],o={課程:s.t};
   return JSON.stringify(o).slice(0,3600)}).join('\n')}
 const EXPROMPT=(sub,idxs,part)=>`你是台灣國小三年級${SUB[sub].n}老師，要依下面「學生學過的課程內容」出一份學校考卷，只能考這些內容，不可超出範圍；用繁體中文（台灣用語）。
 ${sub==='cn'?'國語答案以教育部《重編國語辭典修訂本》為準；不出計算、筆畫、口語跟讀題。':''}
-${part>1?'這是補充出題：前面出的題目太少，考卷還沒填滿，請再出 3～5 個大題，每個大題 4～8 題，題目總數 20 題以上'+(sub==='cn'?'，可以從習作評量裡多取材':'')+'，儘量挑不同的字詞和句子':'這是一份要印在紙上、讓學生用筆手寫作答的考卷（整張考卷分兩次產生，這是第 '+(part+1)+' 次，只出這次負責的大題即可，兩次合起來會把整張考卷正反兩面填滿）：'+(sub==='cn'?(part?'共 5～7 個大題，每個大題 5～10 題，題目總數 28 題以上，可以從習作評量裡多取材':'共 5～6 個大題，每個大題 5～10 題，題目總數 27 題以上，可以從習作評量裡多取材'):(part?'共 4～5 個大題，每個大題 4～8 題，題目總數 20 題以上':'共 4～6 個大題，每個大題 4～8 題，題目總數 20 題以上'))}，難度由易到難，題型要像學校考試，所有題目都要能用筆在紙上作答，答案必須能從課程內容確定。
+${part>1?'這是補充出題：前面出的題目太少，考卷還沒填滿，請再出 '+(sub==='cn'?'2～3 個大題，每個大題 4～6 題，題目總數 8～12 題，可以從習作評量裡多取材':'3～5 個大題，每個大題 4～8 題，題目總數 20 題以上')+'，儘量挑不同的字詞和句子':'這是一份要印在紙上、讓學生用筆手寫作答的考卷（整張考卷分兩次產生，這是第 '+(part+1)+' 次，只出這次負責的大題即可，兩次合起來會把整張考卷正反兩面填滿）：'+(sub==='cn'?(part?'共 4～5 個大題，每個大題 4～8 題，題目總數 22～24 題，可以從習作評量裡多取材':'共 4～5 個大題，每個大題 4～8 題，題目總數 22～24 題，可以從習作評量裡多取材'):(part?'共 4～5 個大題，每個大題 4～8 題，題目總數 20 題以上':'共 4～6 個大題，每個大題 4～8 題，題目總數 20 題以上'))}，難度由易到難，題型要像學校考試，所有題目都要能用筆在紙上作答，答案必須能從課程內容確定。
 ${sub==='cn'?(part>1?'這次的大題從這些題型搭配：選注音 zy、改錯字 fix、圈出正確的字 pick、部首與造詞 rad、共同部首 rad2、選填詞語 bank、選擇題 mc、○×題 tfx、照樣寫短語 like、造句 sent、排句子 ordc、連一連 link、圈出動詞 verb。':part?'這次的大題從這些題型搭配：選填詞語 bank、選擇題 mc、○×題 tfx、照樣寫短語 like、造句 sent、排句子 ordc、連一連 link、圈出動詞 verb。':'這次的第一個大題固定出「寫國字或注音」（write，8～16 格），其餘大題從這些題型搭配：選注音 zy、改錯字 fix、圈出正確的字 pick、部首與造詞 rad、共同部首 rad2。'):(part>1?'這次的大題從這些題型搭配：選擇題 mc、○×題 tfx、填空 fill、填數字 num、選填詞語 bank、連一連 link、排句子 ordc、造句 sent。':part?'這次的大題從這些題型搭配：選填詞語 bank、連一連 link、排句子 ordc、造句 sent。':'這次的大題從這些題型搭配：選擇題 mc、○×題 tfx、填空 fill、填數字 num。')}
 只輸出 JSON：{"secs":[{"k":題型,"t":"大題標題","d":"作答說明","pt":每題分數,"items":[…]}]}
 題型 k 與 items 格式：
@@ -2801,7 +2807,7 @@ async function exAI(sub,idxs){
   }
   if(!all.length)throw (rs[0].status==='rejected'&&rs[0].reason?rs[0].reason:'這次 AI 沒有整理出可用的題目，請再按一次「出題」。');
   const tot=all.reduce((a,s)=>a+(s.items||[]).length,0);
-  if(tot<(sub==='cn'?48:36)){
+  if(tot<(sub==='cn'?44:36)){
     try{
       const raw=await call(2);
       const x=arr(raw).find(o=>o&&o.secs!==undefined)||arr(raw)[0]||raw;
@@ -2811,6 +2817,7 @@ async function exAI(sub,idxs){
   }
   all.forEach(s=>{if(s.k==='link'&&s.items.length<2)s.items=[]});
   const secs=all.filter(s=>s.items.length&&ppMax(s)>0);if(!secs.length)throw '這次 AI 沒有整理出可用的題目，請再按一次「出題」。';
+  if(sub==='cn'){let t=secs.reduce((a,s)=>a+s.items.length,0);for(let i=secs.length-1;i>=0&&t>48;i--){const s2=secs[i];while(s2.items.length>3&&t>48){s2.items.pop();t--}}}
   try{vfyPaper({o:secs,h:[]})}catch(e){}
   return exPoints(secs);
 }
@@ -2840,7 +2847,7 @@ const BLANK=(ck,t,n)=>`<span class="blk2">（${ck?AV(t):GAP(n)}）</span>`;
 const hsh=s=>{let h=2166136261;s=String(s);for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619)}return h>>>0};
 const shufSeed=(a,seed)=>{const r=a.slice();let x=hsh(seed)||1;const rnd=()=>{x=(Math.imul(x,1103515245)+12345)>>>0;return x};for(let i=r.length-1;i>0;i--){const j=rnd()%(i+1);[r[i],r[j]]=[r[j],r[i]]}return r};
 const exTbl=sec=>`<table class="pvt2">${sec.head&&sec.head.length?`<tr>${sec.head.map(h=>`<th>${pe(h)}</th>`).join('')}</tr>`:''}${sec.items.map(r=>`<tr>${r.c.map(c=>`<td>${pe(c)}</td>`).join('')}</tr>`).join('')}</table>`;
-function paperItem(sec,it,ii,ck){
+function paperItem(sec,it,ii,ck,cn){
   const no=`<span class="qn">${ii+1}.</span>`,k=sec.k;
   if(MATH[k]){
     switch(k){
@@ -2885,20 +2892,21 @@ function paperItem(sec,it,ii,ck){
   case 'rad':{const rr=radRef(it.c,it),exs=wordEx(it.c,it.ws);return `${no}<b>${pe(it.c)}</b>：${BLANK(ck,rr,1)}部　造詞：${BLANK(ck,exs[0]||'',3)}`}
   case 'rad2':return `${no}（${ck?AV(it.b):GAP(1)}）部　${it.cs.map(c=>`<span><b>${pe(c)}</b>：${BLANK(ck,wordEx(c,[])[0]||'',3)}</span>`).join('　')}`;
   case 'verb':{const tk=it.s.split('|').filter(Boolean);return `${no}${tk.map(t=>/^[，。！？、：；]$/.test(t)?pe(t):(ck&&it.a.includes(t)?`<b class="cir2">${pe(t)}</b>`:pe(t))).join('')}`}
-  case 'like':{const parts=it.tpl.split(blankRe);return `${no}<span class="exd2">例：${pe(it.model)}</span><div class="frow">${parts.map((t,q)=>pe(t)+(q<parts.length-1?GAP(4):'')).join('')}</div>${ck&&it.ref?`<p class="why">參考：${pe(it.ref)}</p>`:''}`}
-  case 'sent':return `${no}${it.q?pe(it.q):`用「<b>${pe(it.kw)}</b>」造一個句子。`}<div class="wl">${ck&&it.ref?'參考：'+pe(it.ref):''}</div><div class="wl"></div>`;
+  case 'like':{const parts=it.tpl.split(blankRe);return `${no}<span class="exd2">例：${pe(it.model)}</span><div class="frow">${parts.map((t,q)=>pe(t)+(q<parts.length-1?(cn?`<span class="gap gsa"></span>`:GAP(4)):'')).join('')}</div>${ck&&it.ref?`<p class="why">參考：${pe(it.ref)}</p>`:''}`}
+  case 'sent':if(cn)return `${no}${it.q?pe(it.q):`用「<b>${pe(it.kw)}</b>」造一個句子。`}${ck&&it.ref?`<span class="why">參考：${pe(it.ref)}</span>`:`<span class="gap gsa"></span>`}`;
+  return `${no}${it.q?pe(it.q):`用「<b>${pe(it.kw)}</b>」造一個句子。`}<div class="wl">${ck&&it.ref?'參考：'+pe(it.ref):''}</div><div class="wl"></div>`;
   case 'ord':{const w=it.w,ord=shufSeed(w.map((x,i)=>i),w.join('|'));let p=ord;if(p.every((v,i)=>v===i)){p=shufSeed(w.map((x,i)=>i),w.join('|')+'!')}
     return `${no}把下面的詞語排成通順的句子，寫出代號。<div class="ops">${p.map((i,q)=>`<span class="op">${CN[q]} ${pe(w[i])}</span>`).join('')}</div><div class="frow">順序：${w.map((_,j)=>ck?AV(CN[p.indexOf(j)]):GAP(1)).join(' → ')}</div>`}
   case 'ordc':return `${no}${it.parts.map((p,j)=>`<span class="op">${CN[j]} ${pe(p)}</span>`).join('　')}<div class="frow">順序：${it.a.map((n,j)=>ck?AV(CN[n-1]):GAP(1)).join(' → ')}</div>`;
   }
   return `${no}${pe(it.p||it.s||it.q||'')}`;
 }
-function paperSec(sec,ck){
+function paperSec(sec,ck,cn){
   const grid=sec.k==='cmp'&&sec.items.every(it=>/^\d+$/.test(String(it.l))&&/^\d+$/.test(String(it.r)));
   const body=sec.k==='tbl'?exTbl(sec):sec.k==='txt'?sec.items.map(it=>`<p class="ctx2" style="white-space:pre-wrap">${pe(it.p)}</p>`).join(''):sec.k==='link'?(()=>{const perm=shufSeed(sec.items.map((_,i)=>i),sec.items.map(x=>x.l+x.r).join('|'));
-    return `<div class="lk2"><div class="lkc2">${sec.items.map((x,i)=>`<div class="lkr"><span class="qn">${i+1}.</span> ${pe(x.l)}　（${ck?AV(CN[perm.indexOf(i)]):GAP(1)}）</div>`).join('')}</div><div class="lkc2">${perm.map((j,q)=>`<div class="lkr">${CN[q]} ${pe(sec.items[j].r)}</div>`).join('')}</div></div>`})():`<div class="${grid?'g2':''}">${sec.items.map((it,ii)=>`<div class="qi">${paperItem(sec,it,ii,ck)}</div>`).join('')}</div>`;
+    return `<div class="lk2"><div class="lkc2">${sec.items.map((x,i)=>`<div class="lkr"><span class="qn">${i+1}.</span> ${pe(x.l)}　（${ck?AV(CN[perm.indexOf(i)]):GAP(1)}）</div>`).join('')}</div><div class="lkc2">${perm.map((j,q)=>`<div class="lkr">${CN[q]} ${pe(sec.items[j].r)}</div>`).join('')}</div></div>`})():`<div class="${grid?'g2':''}">${sec.items.map((it,ii)=>`<div class="qi">${paperItem(sec,it,ii,ck,cn)}</div>`).join('')}</div>`;
   return `<section class="xsec"><h3>${pe(sec.t)}<span class="expt">（共 ${sec.sp||0} 分）</span></h3>${sec.d?`<p class="exd2">${pe(noPts(sec.d))}</p>`:''}${sec.bank?`<div class="bankbox2"><b>詞語框</b>：${sec.bank.map(x=>pe(x)).join('、')}</div>`:''}${body}</section>`}
-function exSheet(les,ck){return les.pp.z[0].secs.map(sec=>paperSec(sec,ck)).join('')}
+function exSheet(les,ck){const cn=sk(les)==='cn';return les.pp.z[0].secs.map(sec=>paperSec(sec,ck,cn)).join('')}
 function examprint(){
   const les=SEC[S.exi],m=S.exm;
   if(!les||!isEx(les))return `${back('exam','回到考卷出題')}<p>找不到這份考卷。</p>`;
@@ -2909,7 +2917,7 @@ function examprint(){
   return `<div class="noprint">${back('exam','回到考卷出題')}<h2>${ck?'✅ 解答':'👀 預覽試題'}</h2><p class="sub">確認內容沒問題後，按「輸出 PDF」。在列印視窗中，目的地選「<b>儲存為 PDF</b>」即可（紙張大小、方向已自動設定）。${ck?'解答卷不要發給學生。':''}</p><button class="go" data-a="ex_print">📄 輸出 PDF</button><button class="go alt" data-a="ex_print2" style="margin-left:8px">🗔 開新視窗列印</button><p class="sub">如果按「輸出 PDF」沒有跳出列印視窗（某些預覽模式會擋住），請改用「開新視窗列印」，在新開的分頁裡列印或儲存成 PDF。</p></div>
   <div class="swr"><div class="sheet ${cn?'cn':''} ${ck?'ansmode':''}">${cn?'':`<div class="hd">${hdInner}</div>`}<div class="exb${cn?' cnb':''}" id="exb"${cn?' data-k="cn"':''}>${cn?`<div class="exhd">${hdInner}</div>`:''}${exSheet(les,ck)}</div></div></div>`;
 }
-/* 所有題目集中在一頁紙正反兩面：超過 2 頁就縮小字級／行高／配圖，最多兩級 */
+/* 所有題目集中在一頁紙正反兩面：超過 2 頁就縮小字級／行高／配圖（國語卷依使用者要求固定 12pt／1.7，不縮小） */
 function exFit(){
   const sh=document.querySelector('#app .sheet');if(!sh)return;
   sh.classList.remove('fs2','fs3','fs4','fs5');
@@ -2917,11 +2925,11 @@ function exFit(){
   const over=()=>{if(cn){exPaginate();return sh.querySelectorAll('.expage').length>2}
     const probe=document.createElement('div');probe.style.cssText='position:absolute;visibility:hidden;height:273mm;width:10px;top:0;left:0';document.body.appendChild(probe);const PH=probe.offsetHeight;probe.remove();
     return sh.scrollHeight>PH*2-40};
+  if(cn){exPaginate();return}
   let g=0;while(over()&&g<4){g++;sh.classList.remove('fs2','fs3','fs4','fs5');sh.classList.add('fs'+(g+1))}
-  if(cn)exPaginate();
 }
 
-/* 國語卷：把各大題量寬度、排成「每頁上下兩列、直式書寫」的版面 */
+/* 國語卷：直式書寫版面；列高依各大題實際高度、一列接一列排滿頁面，不留大白空 */
 function exPaginate(){
   const b=document.getElementById('exb');if(!b||b.dataset.k!=='cn')return;
   if(b.dataset.src===undefined)b.dataset.src=b.innerHTML;else if(b.dataset.done)b.innerHTML=b.dataset.src;
@@ -2939,15 +2947,20 @@ function exPaginate(){
   const W=Math.floor((b.clientWidth-(hdW?hdW+Math.round(PH*0.02):0))*0.97);
   b.classList.add('meas');
   const secs=[...b.querySelectorAll(':scope>.xsec')],ws=secs.map(s=>s.offsetWidth+2);
+  const hs=secs.map(s=>{const r2=document.createRange();r2.selectNodeContents(s);const h=Math.ceil(r2.getBoundingClientRect().height);r2.detach();return Math.min(h,H)});
   b.classList.remove('meas');
-  const pages=[];let row=[],rw=0,cur=[];
+  const rows=[];let row=[],rw=0;
   secs.forEach((s,i)=>{const w=ws[i];
-    if(rw+w>W&&row.length){cur.push(row);row=[];rw=0;if(cur.length===2){pages.push(cur);cur=[]}}
-    row.push(s);rw+=w});
-  if(row.length)cur.push(row);
+    if(rw+w>W&&row.length){rows.push(row);row=[];rw=0}
+    row.push({s,h:hs[i]});rw+=w});
+  if(row.length)rows.push(row);
+  const pages=[];let cur=[],ch=0;
+  rows.forEach(r=>{const rh=Math.max.apply(null,r.map(x=>x.h));
+    if(cur.length&&ch+gap+rh>PH){pages.push(cur);cur=[];ch=0}
+    cur.push({r,rh});ch+=(ch?gap:0)+rh});
   if(cur.length)pages.push(cur);
-  b.innerHTML=pages.map((p,pi)=>{const rows=p.map(r=>`<div class="exrow">${r.map(s=>s.outerHTML).join('')}</div>`).join('');
-    return `<div class="expage${pi===0&&hdHtml?' first':''}">${pi===0&&hdHtml?`<div class="pgb">${rows}</div><div class="hd">${hdHtml}</div>`:rows}</div>`}).join('');
+  b.innerHTML=pages.map((p,pi)=>{const rowsH=p.map(x=>`<div class="exrow" style="--rh:${x.rh}px">${x.r.map(y=>y.s.outerHTML).join('')}</div>`).join('');
+    return `<div class="expage${pi===0&&hdHtml?' first':''}">${pi===0&&hdHtml?`<div class="pgb">${rowsH}</div><div class="hd">${hdHtml}</div>`:rowsH}</div>`}).join('');
   b.dataset.done='1';
 }
 async function exClick(b){
